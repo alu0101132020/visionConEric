@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-
 import webbrowser
 import matplotlib.pyplot as plt
 import sys
 from statistics  import stdev
 from PIL import Image
-
+import sklearn
 
 # Function that asserts that the image is grayscale.
 def is_grey_scale(img):
@@ -46,8 +45,8 @@ def y_axis_setter():
 def obtain_extension(imageFileName) :
     return imageFileName.split('.')[1]
 
-def image_size(image):
-    w,h = image.size
+def image_size(img):
+    w,h = img.size
     return w * h
 
 def find_min_max(relative_histogram):
@@ -72,8 +71,18 @@ def get_bright(relative_histogram, img):
     total_values = summ_of_values(relative_histogram)
     return total_values / total_pixels
 
-def get_contrast(relative_histogram) :
-    return stdev(relative_histogram)
+def get_contrast(relative_histogram, img) :
+    array_dev = [0] * image_size(img)
+    w,h = img.size
+    for i in range(w):
+        for j in range(h):
+            array_dev[i + j * w] = img.getpixel((i,j))
+    return stdev(array_dev)
+
+def normalize(array, img) :
+    size = image_size(img)
+    for i in range(len(array)) :
+        array[i] = array[i] / size
     
 
 # We get the argument from pronm (name if the image)
@@ -93,23 +102,28 @@ acumulative_histogram = count_pixels_values_acumulative(relative_histogram)
 
 y_axis = y_axis_setter()
 
+normalize(relative_histogram, image)
+normalize(acumulative_histogram, image)
+
 plt.plot(y_axis, relative_histogram)
 plt.title('Amount of pixels with each value')
 plt.xlabel('Values')
 plt.ylabel('Amount')
-# plt.show()
+plt.show()
 
 plt.plot(y_axis, acumulative_histogram)
 plt.title('Amount of pixels acumulated for each value')
 plt.xlabel('Values')
 plt.ylabel('Amount acumulated')
-# plt.show()
+plt.show()
+
+
 
 print(obtain_extension(imageFileName))
 print(image_size(image))
 print(find_min_max(relative_histogram))
 print(get_bright(relative_histogram, image))
-print(get_contrast(relative_histogram))
+print(get_contrast(relative_histogram, image))
 # webbrowser.open(imageFileName)
 
 
