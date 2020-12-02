@@ -1,1 +1,0 @@
-# VPC - Manu y Eric
