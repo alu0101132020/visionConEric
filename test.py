@@ -188,7 +188,20 @@ def transformation_by_sections(img, relative_histogram) :
         error_string += "Start of section can't be bigger than an end of section an end of Section can't be bigger than 255"
         print(error_string)
 
+def equalize_histogram(img, hist_acc, codification_bits) :
+    chart = [0] * 256
+    size = image_size(img)
 
+    for i in range(len(chart)) :
+        chart[i] = max(0, round(2**codification_bits / size * hist_acc[i] - 1))
+
+    new_img = img.load()
+    w,h = img.size
+    for i in range(w) :
+        for j in range(h) :
+            new_img[i, j] = chart[img.getpixel((i,j))]
+    return img
+    
 
 # We get the argument from pronm (name if the image)
 imageFileName = sys.argv[1]
@@ -205,7 +218,7 @@ relative_histogram = count_pixels_values_relative(image)
 
 accumulative_histogram = count_pixels_values_acumulative(relative_histogram)
 
-# show_histograms(image, relative_histogram, accumulative_histogram)
+show_histograms(image, relative_histogram, accumulative_histogram)
 
 current_brightness = get_bright(relative_histogram, image)
 current_contrast = get_contrast(relative_histogram, image)
@@ -223,9 +236,15 @@ print(round(current_contrast, 2))
 
 # new_img = conversion(image, A, B)
 
-new_img = transformation_by_sections(image, relative_histogram)
+# new_img = transformation_by_sections(image, relative_histogram)
+
+new_img2 = equalize_histogram(image, relative_histogram, 8)
+
 
 array = imageFileName.split('.')
-imageFileConverted = array[0] + '_converted.jpg' 
-new_img.save(imageFileConverted)
+# imageFileConverted = array[0] + '_converted.jpg' 
+# new_img.save(imageFileConverted)
 # webbrowser.open(imageFileName)
+
+imageFileEqualized = array[0] + '_equalized.jpg' 
+new_img2.save(imageFileEqualized)
