@@ -88,6 +88,20 @@ def get_contrast(relative_histogram, img) :
     summ = math.sqrt(summ / total_pixels)
     return summ
 
+def get_entropy(img) :
+    acc = 0.0
+
+    accumulative_histogram = count_pixels_values_relative(img)
+    accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
+
+    for i in accumulative_histogram_normalized :
+        if i != 0 :
+            log_result = math.log2(i)
+            acc += i * log_result   
+    
+    entropy = acc * -1
+    return entropy
+
 def normalize_histogram(array, img) :
     arrayNormalized = array.copy()
     size = image_size(img)
@@ -245,7 +259,7 @@ def gamma_correction(img) :
     return img
 
 def differences_between_images(img1, img2):
-    img3 = img1
+    img3 = img1.copy()
     new_img = img3.load()
     w,h = img3.size
     for i in range(w) :
@@ -267,6 +281,9 @@ def differences_between_images(img1, img2):
         for j in range(h) :
             if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)) :
                 img3.putpixel((i,j), (255, 0, 0))
+            else :
+                img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
+
     return img3
 
 # We get the argument from pronm (name if the image)
@@ -289,11 +306,12 @@ if (not is_grey_scale(image2)) :
     image2FileName = array[0] + '_grayscale.jpg' 
     image2.save(image2FileName)
 
-# relative_histogram = count_pixels_values_relative(image)
+relative_histogram = count_pixels_values_relative(image)
 
-# accumulative_histogram = count_pixels_values_acumulative(relative_histogram)
+accumulative_histogram = count_pixels_values_acumulative(relative_histogram)
 
-# show_histograms(image, relative_histogram, accumulative_histogram)
+show_histograms(image, relative_histogram, accumulative_histogram)
+print(get_entropy(image))
 
 # current_brightness = get_bright(relative_histogram, image)
 # current_contrast = get_contrast(relative_histogram, image)
