@@ -91,8 +91,8 @@ def get_contrast(relative_histogram, img) :
 def get_entropy(img) :
     acc = 0.0
 
-    accumulative_histogram = count_pixels_values_relative(img)
-    accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
+    relative_histogram = count_pixels_values_relative(img)
+    accumulative_histogram_normalized = normalize_histogram(relative_histogram, img)
 
     for i in accumulative_histogram_normalized :
         if i != 0 :
@@ -138,13 +138,13 @@ def show_histograms(img, relative_histogram, accumulative_histogram) :
     accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
 
     plt.plot(y_axis, relative_histogram_normalized)
-    plt.title('Amount of pixels with each value')
+    plt.title('Relative histogram')
     plt.xlabel('Values')
     plt.ylabel('Amount')
     plt.show()
 
     plt.plot(y_axis, accumulative_histogram_normalized)
-    plt.title('Amount of pixels acumulated for each value')
+    plt.title('Cumulative histogram (normalized)')
     plt.xlabel('Values')
     plt.ylabel('Amount acumulated')
     plt.show()
@@ -274,15 +274,15 @@ def differences_between_images(img1, img2):
 
     threshold_value = int(input('Introduce the threshold value: '))
 
-    new_img = img3.load()
-    img3 = img3.convert(mode='RGB')
-    w,h = img3.size
-    for i in range(w) :
-        for j in range(h) :
-            if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)) :
-                img3.putpixel((i,j), (255, 0, 0))
-            else :
-                img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
+    # new_img = img3.load()
+    # img3 = img3.convert(mode='RGB')
+    # w,h = img3.size
+    # for i in range(w) :
+    #     for j in range(h) :
+    #         if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)) :
+    #             img3.putpixel((i,j), (255, 0, 0))
+    #         else :
+    #             img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
 
     return img3
 
@@ -311,7 +311,8 @@ relative_histogram = count_pixels_values_relative(image)
 accumulative_histogram = count_pixels_values_acumulative(relative_histogram)
 
 show_histograms(image, relative_histogram, accumulative_histogram)
-print(get_entropy(image))
+
+# ---- Mostrar propiedades ----
 
 # current_brightness = get_bright(relative_histogram, image)
 # current_contrast = get_contrast(relative_histogram, image)
@@ -320,27 +321,31 @@ print(get_entropy(image))
 # print(find_min_max(relative_histogram))
 # print(round(current_brightness, 2))
 # print(round(current_contrast, 2))
+# print(get_entropy(image))
+
+array = imageFileName.split('.')
 
 # new_brightness = float(input('Insert brightness that you would like to change to: '))
 # new_contrast = float(input('Insert constrast that you would like to change to: '))
 
 # A = current_contrast / new_contrast
+
+# # Revisar B (contraste)
 # B = new_brightness - current_brightness * A
 
 # new_img = conversion(image, A, B)
-
-# new_img = transformation_by_sections(image, relative_histogram)
-
-# new_img2 = equalize_histogram(image, accumulative_histogram, 8)
-
-
-array = imageFileName.split('.')
 # imageFileConverted = array[0] + '_converted.jpg' 
 # new_img.save(imageFileConverted)
+
 # webbrowser.open(imageFileName)
 
+# new_img1 = transformation_by_sections(image, relative_histogram)
+# imageFileSectioned = array[0] + '_sectioned.jpg' 
+# new_img1.save(imageFileSectioned)
+
+# image = equalize_histogram(image, accumulative_histogram, 8)
 # imageFileEqualized = array[0] + '_equalized.jpg' 
-# new_img2.save(imageFileEqualized)
+# image.save(imageFileEqualized)
 
 # new_img3 = specify_histogram(image, image2)
 
@@ -354,3 +359,5 @@ array = imageFileName.split('.')
 new_img5 = differences_between_images(image, image2)
 imageFileDifferences = array[0] + '_differences.jpg' 
 new_img5.save(imageFileDifferences)
+
+# Contraste, interfaz gráfica, seccionar imágenes, + opcionales.
