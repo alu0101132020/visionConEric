@@ -29,11 +29,7 @@ def openFile():
     img_name = file_path.split('/')[-1]
     global img
     img = grayscale_check_and_convertion(file_path)
-    displayed_img = ImageTk.PhotoImage(img)
-    l=Label(image=displayed_img)
-    l.pack()    
-    # canvas.create_image(20,20, anchor=NW, image=img) 
-    master.mainloop()
+    refreshImageVisualization()
 
 def saveOurImage():
     img.save(img_name)
@@ -43,6 +39,20 @@ def saveAsOurImage():
     if (img_name.split('.')[-1] != 'jpg') :
         img_name += '.jpg'
     img.save(img_name)
+
+def refreshImageVisualization() :
+    displayed_img = ImageTk.PhotoImage(img)
+    l=Label(image=displayed_img)
+    l.pack()    
+    master.mainloop()
+
+def absoluteHistogram():
+    if (img != None):
+        show_absolute_histogram(img)
+
+def cumulativeHistogram():
+    if (img != None):
+        show_accumulative_histogram(img)
 
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
@@ -54,8 +64,8 @@ fileMenu.add_command(label="Guardar como...", command=saveAsOurImage)
 fileMenu.add_command(label="Cerrar", command=exitApplication)
 
 propertyMenu=Menu(menuBar, tearoff=0)
-propertyMenu.add_command(label="Histograma abs.")
-propertyMenu.add_command(label="Histograma acc.")
+propertyMenu.add_command(label="Histograma abs.", command=absoluteHistogram)
+propertyMenu.add_command(label="Histograma acc.", command=cumulativeHistogram)
 propertyMenu.add_command(label="Brillo")
 propertyMenu.add_command(label="Contraste")
 

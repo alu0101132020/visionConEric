@@ -131,23 +131,31 @@ def conversion(img, A, B) :
             new_img[i, j] = array[img.getpixel((i,j))]
 
     return img
-    
-def show_histograms(img, relative_histogram, accumulative_histogram) :
+
+def show_absolute_histogram(img) :
+    relative_histogram = count_pixels_values_relative(img)
     y_axis = y_axis_setter()
     relative_histogram_normalized = normalize_histogram(relative_histogram, img)
-    accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
-
     plt.plot(y_axis, relative_histogram_normalized)
     plt.title('Amount of pixels with each value')
     plt.xlabel('Values')
     plt.ylabel('Amount')
     plt.show()
 
+def show_accumulative_histogram(img) :
+    accumulative_histogram = count_pixels_values_acumulative(img)
+    y_axis = y_axis_setter()
+    accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
     plt.plot(y_axis, accumulative_histogram_normalized)
     plt.title('Amount of pixels acumulated for each value')
     plt.xlabel('Values')
     plt.ylabel('Amount acumulated')
     plt.show()
+
+def show_histograms(img) :
+    show_absolute_histogram(img)
+    show_cumulative_histogram(img)
+
 
 def define_sections(number_of_sections) :
     sections = [0]
