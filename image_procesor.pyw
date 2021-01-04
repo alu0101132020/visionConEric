@@ -5,17 +5,15 @@ import webbrowser
 import matplotlib.pyplot as plt
 import sys
 from statistics  import stdev
-from PIL import Image
+from PIL import Image, ImageTk
 import sklearn
 import math
-import sys
 import os
 from main import *
 
 if os.environ.get('DISPLAY','') == '':
     print('no display found. Using :0.0')
     os.environ.__setitem__('DISPLAY', ':0.0')
-
 
 master = Tk()
 
@@ -27,28 +25,32 @@ def exitApplication():
 def openFile():
     file_path = filedialog.askopenfilename(title="Open File", filetypes=(("Imágenes", "*.jpg"), 
         ("Imágenes", "*.png"), ("Todos los ficheros", "*.*")))
-    print(file_path)
-    image = Image.open(file_path)
+    global img_name
+    img_name = file_path.split('/')[-1]
+    global img
+    img = grayscale_check_and_convertion(file_path)
+    displayed_img = ImageTk.PhotoImage(img)
+    l=Label(image=displayed_img)
+    l.pack()    
+    # canvas.create_image(20,20, anchor=NW, image=img) 
+    master.mainloop()
 
-    if (not is_grey_scale(image)) :
-        image = image.convert(mode='L')
-        array = file_path.split('.')
-        file_path = array[0] + '_grayscale.jpg' 
-        image.save(file_path)
+def saveOurImage():
+    img.save(img_name)
 
-    canvas = Canvas(master, width = 300, height = 300)      
-    canvas.pack()      
-    img = PhotoImage(file=file_path)      
-    canvas.create_image(20,20, anchor=NW, image=img) 
-    
+def saveAsOurImage():
+    img_name = filedialog.asksaveasfilename(confirmoverwrite=False)
+    if (img_name.split('.')[-1] != 'jpg') :
+        img_name += '.jpg'
+    img.save(img_name)
 
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
 
 fileMenu=Menu(menuBar, tearoff=0)
-fileMenu.add_command(label="Open File", command=openFile)
-fileMenu.add_command(label="Guardar")
-fileMenu.add_command(label="Guardar como...")
+fileMenu.add_command(label="Abrir imagen", command=openFile)
+fileMenu.add_command(label="Guardar", command=saveOurImage)
+fileMenu.add_command(label="Guardar como...", command=saveAsOurImage)
 fileMenu.add_command(label="Cerrar", command=exitApplication)
 
 propertyMenu=Menu(menuBar, tearoff=0)
