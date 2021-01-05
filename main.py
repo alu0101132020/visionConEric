@@ -28,7 +28,8 @@ def count_pixels_values_relative(img):
     return relative_histogram
 
 # Function that counts for each possible value and all the previous one how many pixels are there, and returns the array that contains all that information.
-def count_pixels_values_acumulative(relative_histogram):
+def count_pixels_values_acumulative(img):
+    relative_histogram = count_pixels_values_relative(img)
     acumulative_histogram = [0] * 256
     total = 0
     for i in range(256):
@@ -74,14 +75,16 @@ def summ_of_values(relative_histogram) :
     return summ
 
 # Function that returns the brightness of the image, defined as the division of the sum of all the pixels values by the ammount of pixeles.
-def get_bright(relative_histogram, img):
+def get_bright(img):
+    relative_histogram = count_pixels_values_relative(img)
     total_pixels = image_size(img)
     total_values = summ_of_values(relative_histogram)
     return total_values / total_pixels
 
-def get_contrast(relative_histogram, img) :
+def get_contrast(img) :
+    relative_histogram = count_pixels_values_relative(img)
     total_pixels = image_size(img)
-    mean = get_bright(relative_histogram, img)
+    mean = get_bright(img)
     summ = 0
     for i in range(len(relative_histogram)):
         summ += relative_histogram[i] * ((i - mean)**2)
@@ -122,7 +125,13 @@ def conversion_array(A, B) :
 
     return array
 
-def conversion(img, A, B) :
+def conversion(img, new_brightness, new_contrast) :
+    current_brightness = get_bright(img)
+    current_contrast = get_contrast(img)
+
+    A = current_contrast / new_contrast
+    B = new_brightness - current_brightness * A
+
     new_img = img.load()
     w,h = img.size
     array = conversion_array(A, B)
@@ -156,66 +165,24 @@ def show_histograms(img) :
     show_absolute_histogram(img)
     show_cumulative_histogram(img)
 
-
-def define_sections(number_of_sections) :
-    sections = [0]
-    start_of_section = 0
-    for i in range (number_of_sections - 1) :
-        string = 'Section ' + str(i + 1) + ' starts in ' + str(start_of_section) + '. Where do you want it to end? -> '
-        end_of_section = int(input(string))
-        if (start_of_section < 255 and start_of_section < end_of_section) :
-            sections.append(end_of_section)
-            start_of_section = end_of_section
-        else:
-            break
-    return sections
-
-def fill_sections_array(index_start_of_section, sections, array) :
-    index_end_of_section = index_start_of_section + 1
-    start_value = int(input('Introduce which value from 0 to 255 you want the section [' + str(sections[index_start_of_section]) + ', ' + str(sections[index_end_of_section]) + '] to start: '))
-    end_value = int(input('Introduce which value from 0 to 255 you want the section [' + str(sections[index_start_of_section]) + ', ' + str(sections[index_end_of_section]) + '] to end: '))
-    y_difference = end_value - start_value
-    x_difference = sections[index_end_of_section] - sections[index_start_of_section]
-    A = y_difference / x_difference
-    B = start_value - A * sections[index_start_of_section]
-    j = sections[index_start_of_section]
-    while j < sections[index_end_of_section] : 
-        value = array[j] * A + B
-        if value > 255:
-            array[j] = 255
-        elif value < 0:
-            array[j] = 0
-        else:
-            array[j] = int(value)
-        j += 1
-
-def transformation_by_sections(img, relative_histogram) :
-    number_of_sections = int(input('Insert the number of sections in which you want to divide the histogram: '))
-    sections = define_sections(number_of_sections)
-    if not (len (sections) != number_of_sections) :
-        sections.append(255)
-        array = y_axis_setter()
-
-        for i in range (number_of_sections) :
-            fill_sections_array(i, sections, array)
-        
+def transformation_by_sections(img, array) :
         new_img = img.load()
         w,h = img.size
         for i in range(w) :
             for j in range(h) :
                 new_img[i, j] = array[img.getpixel((i,j))]
         return img
-    else:
-        error_string = 'There was an error inserting a section.'
-        error_string += "Start of section can't be bigger than an end of section an end of Section can't be bigger than 255"
-        print(error_string)
+    
 
-def equalize_histogram(img, hist_acc, codification_bits) :
+def equalize_histogram(img, codification_bits=8):
+    relative_histogram = count_pixels_values_relative(img)
+    accumulative_histogram = count_pixels_values_acumulative(img)
+    
     chart = [0] * 256
     size = image_size(img)
 
     for i in range(len(chart)) :
-        chart[i] = max(0, round((2**codification_bits / size) * hist_acc[i]) - 1)
+        chart[i] = max(0, round((2**codification_bits / size) * accumulative_histogram[i]) - 1)
 
     new_img = img.load()
     w,h = img.size
@@ -226,9 +193,9 @@ def equalize_histogram(img, hist_acc, codification_bits) :
 
 def specify_histogram(img1, img2) :
     relative_histogram1 = count_pixels_values_relative(img1)
-    accumulative_histogram1 = count_pixels_values_acumulative(relative_histogram1)
+    accumulative_histogram1 = count_pixels_values_acumulative(img1)
     relative_histogram2 = count_pixels_values_relative(img2)
-    accumulative_histogram2 = count_pixels_values_acumulative(relative_histogram2)
+    accumulative_histogram2 = count_pixels_values_acumulative(img2)
     accumulative_histogram_normalized1 = normalize_histogram(accumulative_histogram1, img1)
     accumulative_histogram_normalized2 = normalize_histogram(accumulative_histogram2, img2)
     chart = [0] * 256
@@ -253,8 +220,7 @@ def find_grayscale_value(normalized_ammount_of_pixels, accumulative_histogram_no
             else :
                 return i
 
-def gamma_correction(img) :
-    gamma_value = float(input('Introduzca el valor deseado de gamma: '))
+def gamma_correction(img, gamma_value) :
     chart = [0] * 256
     for i in range(len(chart)) :
         chart[i] = round(255 * (i / 255)**gamma_value)
@@ -276,7 +242,7 @@ def differences_between_images(img1, img2):
 
     relative_histogram = count_pixels_values_relative(img3)
 
-    accumulative_histogram = count_pixels_values_acumulative(relative_histogram)
+    accumulative_histogram = count_pixels_values_acumulative(img3)
 
     show_histograms(image, relative_histogram, accumulative_histogram)
 
