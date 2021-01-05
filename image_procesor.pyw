@@ -165,6 +165,7 @@ menuBar.add_cascade(label="Properties", menu=propertyMenu)
 menuBar.add_cascade(label="Edit", menu=editMenu)
 menuBar.add_cascade(label="Help", menu=helpMenu)
 
+
 displayed_img = ImageTk.PhotoImage(Image.open("inicio.jpg"))
 l=Label(master, image=displayed_img)
 l.pack(side="bottom", fill="both", expand="yes")
