@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 import sklearn
 import math
 import os
-from main import *
+from processing_functions import *
 
 if os.environ.get('DISPLAY','') == '':
     #print('no display found. Using :0.0')
@@ -134,6 +134,26 @@ def editEcualization():
         img = equalize_histogram(img)
         refreshImageVisualization()
 
+# --------------------- SEGUNDA PARTE -----------------------
+
+def geom_vertical_mirror():
+    global img
+    if (img != None):
+        img = vertical_mirror(img)
+        refreshImageVisualization()
+
+def geom_horizontal_mirror():
+    global img
+    if (img != None):
+        img = horizontal_mirror(img)
+        refreshImageVisualization()
+
+def geom_traspose():
+    global img
+    if (img != None):
+        img = traspose(img)
+        refreshImageVisualization()
+
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
 
@@ -154,15 +174,40 @@ editMenu.add_command(label="Lineal", command=editLineal)
 editMenu.add_command(label="Transformacion por tramos", command=editBySections)
 editMenu.add_command(label="Gamma", command=editGamma)
 editMenu.add_command(label="Ecualización", command=editEcualization)
-editMenu.add_command(label="Diferencia")
+editMenu.add_command(label="Especificar hist.")
+
+differenceMenu=Menu(editMenu, tearoff=0)
+editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
+differenceMenu.add_command(label="Diferencia")
+differenceMenu.add_command(label="Mostrar diferencias")
 
 helpMenu=Menu(menuBar, tearoff=0)
 helpMenu.add_command(label="License")
 helpMenu.add_command(label="About")
 
+geometricMenu=Menu(menuBar, tearoff=0)
+mirrorMenu=Menu(geometricMenu, tearoff=0)
+geometricMenu.add_cascade(label="Espejos", menu=mirrorMenu)
+mirrorMenu.add_command(label="Vertical", command=geom_vertical_mirror)
+mirrorMenu.add_command(label="Horizontal", command=geom_horizontal_mirror)
+mirrorMenu.add_command(label="Traspuesta", command=geom_traspose)
+
+rotateMenu=Menu(geometricMenu, tearoff=0)
+geometricMenu.add_cascade(label="Rotacion", menu=rotateMenu)
+rotateMenu.add_command(label="90º")
+rotateMenu.add_command(label="180º")
+rotateMenu.add_command(label="270º")
+rotateMenu.add_command(label="...")
+
+scaleMenu=Menu(geometricMenu, tearoff=0)
+geometricMenu.add_cascade(label="Escalado", menu=scaleMenu)
+scaleMenu.add_command(label="Dimensiones")
+scaleMenu.add_command(label="Porcentajes")
+
 menuBar.add_cascade(label="File", menu=fileMenu)
 menuBar.add_cascade(label="Properties", menu=propertyMenu)
 menuBar.add_cascade(label="Edit", menu=editMenu)
+menuBar.add_cascade(label="Op. Geom.", menu=geometricMenu)
 menuBar.add_cascade(label="Help", menu=helpMenu)
 
 

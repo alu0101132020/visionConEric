@@ -48,7 +48,7 @@ def y_axis_setter():
     return y_axis
 
 # Function that returns a file name, extracts the extension and returns it.
-def obtain_extension(imageFileName) :
+def obtain_extension(imageFileName):
     return imageFileName.split('.')[1]
 
 # Function that returns the image size, defined as the multiplication of the width and height.
@@ -68,7 +68,7 @@ def find_min_max(relative_histogram):
     return [i, j]
 
 # Function that returns the summ of all the grayscale values.
-def summ_of_values(relative_histogram) :
+def summ_of_values(relative_histogram):
     summ = 0
     for i in range(len(relative_histogram)):
         summ += relative_histogram[i] * i
@@ -81,7 +81,7 @@ def get_bright(img):
     total_values = summ_of_values(relative_histogram)
     return total_values / total_pixels
 
-def get_contrast(img) :
+def get_contrast(img):
     relative_histogram = count_pixels_values_relative(img)
     total_pixels = image_size(img)
     mean = get_bright(img)
@@ -91,30 +91,30 @@ def get_contrast(img) :
     summ = math.sqrt(summ / total_pixels)
     return summ
 
-def get_entropy(img) :
+def get_entropy(img):
     acc = 0.0
 
     accumulative_histogram = count_pixels_values_relative(img)
     accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
 
-    for i in accumulative_histogram_normalized :
-        if i != 0 :
+    for i in accumulative_histogram_normalized:
+        if i != 0:
             log_result = math.log2(i)
             acc += i * log_result   
     
     entropy = acc * -1
     return entropy
 
-def normalize_histogram(array, img) :
+def normalize_histogram(array, img):
     arrayNormalized = array.copy()
     size = image_size(img)
-    for i in range(len(array)) :
+    for i in range(len(array)):
         arrayNormalized[i] = arrayNormalized[i] / size
     return arrayNormalized
 
-def conversion_array(A, B) :
+def conversion_array(A, B):
     array = y_axis_setter()
-    for i in range(len(array)) :
+    for i in range(len(array)):
         value = array[i] * A + B
         if value > 255:
             array[i] = 255
@@ -125,7 +125,7 @@ def conversion_array(A, B) :
 
     return array
 
-def conversion(img, new_brightness, new_contrast) :
+def conversion(img, new_brightness, new_contrast):
     current_brightness = get_bright(img)
     current_contrast = get_contrast(img)
 
@@ -135,13 +135,13 @@ def conversion(img, new_brightness, new_contrast) :
     new_img = img.load()
     w,h = img.size
     array = conversion_array(A, B)
-    for i in range(w) :
-        for j in range(h) :
+    for i in range(w):
+        for j in range(h):
             new_img[i, j] = array[img.getpixel((i,j))]
 
     return img
 
-def show_absolute_histogram(img) :
+def show_absolute_histogram(img):
     relative_histogram = count_pixels_values_relative(img)
     y_axis = y_axis_setter()
     relative_histogram_normalized = normalize_histogram(relative_histogram, img)
@@ -151,7 +151,7 @@ def show_absolute_histogram(img) :
     plt.ylabel('Amount')
     plt.show()
 
-def show_accumulative_histogram(img) :
+def show_accumulative_histogram(img):
     accumulative_histogram = count_pixels_values_acumulative(img)
     y_axis = y_axis_setter()
     accumulative_histogram_normalized = normalize_histogram(accumulative_histogram, img)
@@ -161,15 +161,15 @@ def show_accumulative_histogram(img) :
     plt.ylabel('Amount acumulated')
     plt.show()
 
-def show_histograms(img) :
+def show_histograms(img):
     show_absolute_histogram(img)
     show_cumulative_histogram(img)
 
-def transformation_by_sections(img, array) :
+def transformation_by_sections(img, array):
         new_img = img.load()
         w,h = img.size
-        for i in range(w) :
-            for j in range(h) :
+        for i in range(w):
+            for j in range(h):
                 new_img[i, j] = array[img.getpixel((i,j))]
         return img
     
@@ -181,17 +181,17 @@ def equalize_histogram(img, codification_bits=8):
     chart = [0] * 256
     size = image_size(img)
 
-    for i in range(len(chart)) :
+    for i in range(len(chart)):
         chart[i] = max(0, round((2**codification_bits / size) * accumulative_histogram[i]) - 1)
 
     new_img = img.load()
     w,h = img.size
-    for i in range(w) :
-        for j in range(h) :
+    for i in range(w):
+        for j in range(h):
             new_img[i, j] = chart[img.getpixel((i,j))]
     return img
 
-def specify_histogram(img1, img2) :
+def specify_histogram(img1, img2):
     relative_histogram1 = count_pixels_values_relative(img1)
     accumulative_histogram1 = count_pixels_values_acumulative(img1)
     relative_histogram2 = count_pixels_values_relative(img2)
@@ -199,36 +199,36 @@ def specify_histogram(img1, img2) :
     accumulative_histogram_normalized1 = normalize_histogram(accumulative_histogram1, img1)
     accumulative_histogram_normalized2 = normalize_histogram(accumulative_histogram2, img2)
     chart = [0] * 256
-    for i in range(len(chart)) :
+    for i in range(len(chart)):
         chart[i] = find_grayscale_value(accumulative_histogram_normalized1[i], accumulative_histogram_normalized2)
 
     new_img = img1.load()
     w,h = img1.size
-    for i in range(w) :
-        for j in range(h) :
+    for i in range(w):
+        for j in range(h):
             new_img[i, j] = chart[img1.getpixel((i,j))]
     return img1
 
-def find_grayscale_value(normalized_ammount_of_pixels, accumulative_histogram_normalized) :
-    for i in range(len(accumulative_histogram_normalized)) :
-        if (accumulative_histogram_normalized[i] >= normalized_ammount_of_pixels) :
-            if normalized_ammount_of_pixels - accumulative_histogram_normalized[i - 1] < accumulative_histogram_normalized[i] - normalized_ammount_of_pixels :
-                if (i != 0) : 
+def find_grayscale_value(normalized_ammount_of_pixels, accumulative_histogram_normalized):
+    for i in range(len(accumulative_histogram_normalized)):
+        if (accumulative_histogram_normalized[i] >= normalized_ammount_of_pixels):
+            if normalized_ammount_of_pixels - accumulative_histogram_normalized[i - 1] < accumulative_histogram_normalized[i] - normalized_ammount_of_pixels:
+                if (i != 0): 
                     return i - 1
-                else :
+                else:
                     return 0
-            else :
+            else:
                 return i
 
-def gamma_correction(img, gamma_value) :
+def gamma_correction(img, gamma_value):
     chart = [0] * 256
-    for i in range(len(chart)) :
+    for i in range(len(chart)):
         chart[i] = round(255 * (i / 255)**gamma_value)
 
     new_img = img.load()
     w,h = img.size
-    for i in range(w) :
-        for j in range(h) :
+    for i in range(w):
+        for j in range(h):
             new_img[i, j] = chart[img.getpixel((i,j))]
     return img
 
@@ -236,8 +236,8 @@ def differences_between_images(img1, img2):
     img3 = img1.copy()
     new_img = img3.load()
     w,h = img3.size
-    for i in range(w) :
-        for j in range(h) :
+    for i in range(w):
+        for j in range(h):
             new_img[i, j] = abs(img1.getpixel((i,j)) - img2.getpixel((i,j)))
 
     relative_histogram = count_pixels_values_relative(img3)
@@ -251,68 +251,61 @@ def differences_between_images(img1, img2):
     new_img = img3.load()
     img3 = img3.convert(mode='RGB')
     w,h = img3.size
-    for i in range(w) :
-        for j in range(h) :
-            if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)) :
+    for i in range(w):
+        for j in range(h):
+            if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)):
                 img3.putpixel((i,j), (255, 0, 0))
-            else :
+            else:
                 img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
 
     return img3
 
-def grayscale_check_and_convertion(imageFileName) :
+def grayscale_check_and_convertion(imageFileName):
     img = Image.open(imageFileName)
-    if (not is_grey_scale(img)) :
+    if (not is_grey_scale(img)):
         img = img.convert(mode='L')
     return img
 
-# relative_histogram = count_pixels_values_relative(image)
+# --------------------- SEGUNDA PARTE -----------------------
 
-# accumulative_histogram = count_pixels_values_acumulative(relative_histogram)
+def vertical_mirror(img):
+    w,h = img.size
+    for i in range(int(w/2)):
+        for j in range(h):
+            aux_pixel = img.getpixel((i, j))
+            img.putpixel((i, j), img.getpixel((w-i-1, j)))
+            img.putpixel((w-i-1, j), aux_pixel)
+    return img
 
-# show_histograms(image, relative_histogram, accumulative_histogram)
-# print(get_entropy(image))
+def horizontal_mirror(img):
+    w,h = img.size
+    for i in range(w):
+        for j in range(int(h/2)):
+            aux_pixel = img.getpixel((i, j))
+            img.putpixel((i, j), img.getpixel((i, h-j-1)))
+            img.putpixel((i, h-j-1), aux_pixel)
+    return img
 
-# current_brightness = get_bright(relative_histogram, image)
-# current_contrast = get_contrast(relative_histogram, image)
-# print(obtain_extension(imageFileName))
-# print(image_size(image))
-# print(find_min_max(relative_histogram))
-# print(round(current_brightness, 2))
-# print(round(current_contrast, 2))
+def traspose(img):
+    h,w = img.size
+    for i in range(w):
+        j = i
+        while(j < h):
+            aux_pixel = img.getpixel((i, j))
+            img.putpixel((i, j), img.getpixel((j, i)))
+            img.putpixel((j, i), aux_pixel)
+            j += 1
+    # Carlos puto troll, hay que crear imagen nueva con los i j cambiados
+    return img
 
-# new_brightness = float(input('Insert brightness that you would like to change to: '))
-# new_contrast = float(input('Insert constrast that you would like to change to: '))
-
-# A = current_contrast / new_contrast
-# B = new_brightness - current_brightness * A
-
-# new_img = conversion(image, A, B)
-
-# new_img = transformation_by_sections(image, relative_histogram)
-
-# new_img2 = equalize_histogram(image, accumulative_histogram, 8)
-
-
-# array = imageFileName.split('.')
-# imageFileConverted = array[0] + '_converted.jpg' 
-# new_img.save(imageFileConverted)
-# webbrowser.open(imageFileName)
-
-# imageFileEqualized = array[0] + '_equalized.jpg' 
-# new_img2.save(imageFileEqualized)
 
 # new_img3 = specify_histogram(image, image2)
 
 # imageFileSpecified = array[0] + '_specified.jpg' 
 # new_img3.save(imageFileSpecified)
 
-# new_img4 = gamma_correction(image)
-# imageFileGamma = array[0] + '_gamma.jpg' 
-# new_img4.save(imageFileGamma)
-
 # new_img5 = differences_between_images(image, image2)
 # imageFileDifferences = array[0] + '_differences.jpg' 
 # new_img5.save(imageFileDifferences)
 
-# Contraste, interfaz gráfica, seccionar imágenes, + opcionales
+# Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales
