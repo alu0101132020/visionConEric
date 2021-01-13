@@ -288,14 +288,14 @@ def vertical_mirror(img):
 
 def traspose(img):
     w, h = img.size
-    trasposed_img = Image.new('RGB', (h, w), (0,0,0))
-    # traspose.resize(w, h)
+    trasposed_img = Image.new('L', (h, w))
+    img = img.convert(mode='L')
 
     for i in range(h):
         for j in range(w):
             trasposed_img.putpixel((i, j), img.getpixel((j, i)))
             j += 1
-    # Carlos puto troll, hay que crear imagen nueva con los i j cambiados
+
     return trasposed_img
 
 
