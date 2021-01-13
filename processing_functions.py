@@ -268,8 +268,8 @@ def grayscale_check_and_convertion(imageFileName):
 
 # --------------------- SEGUNDA PARTE -----------------------
 
-def vertical_mirror(img):
-    w,h = img.size
+def horizontal_mirror(img):
+    w, h = img.size
     for i in range(int(w/2)):
         for j in range(h):
             aux_pixel = img.getpixel((i, j))
@@ -277,8 +277,8 @@ def vertical_mirror(img):
             img.putpixel((w-i-1, j), aux_pixel)
     return img
 
-def horizontal_mirror(img):
-    w,h = img.size
+def vertical_mirror(img):
+    w, h = img.size
     for i in range(w):
         for j in range(int(h/2)):
             aux_pixel = img.getpixel((i, j))
@@ -287,16 +287,16 @@ def horizontal_mirror(img):
     return img
 
 def traspose(img):
-    h,w = img.size
-    for i in range(w):
-        j = i
-        while(j < h):
-            aux_pixel = img.getpixel((i, j))
-            img.putpixel((i, j), img.getpixel((j, i)))
-            img.putpixel((j, i), aux_pixel)
+    w, h = img.size
+    trasposed_img = Image.new('RGB', (h, w), (0,0,0))
+    # traspose.resize(w, h)
+
+    for i in range(h):
+        for j in range(w):
+            trasposed_img.putpixel((i, j), img.getpixel((j, i)))
             j += 1
     # Carlos puto troll, hay que crear imagen nueva con los i j cambiados
-    return img
+    return trasposed_img
 
 
 # new_img3 = specify_histogram(image, image2)
