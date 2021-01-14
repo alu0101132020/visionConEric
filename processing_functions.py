@@ -270,20 +270,24 @@ def grayscale_check_and_convertion(imageFileName):
 
 def horizontal_mirror(img):
     w, h = img.size
+
     for i in range(int(w/2)):
         for j in range(h):
             aux_pixel = img.getpixel((i, j))
             img.putpixel((i, j), img.getpixel((w-i-1, j)))
             img.putpixel((w-i-1, j), aux_pixel)
+
     return img
 
 def vertical_mirror(img):
     w, h = img.size
+
     for i in range(w):
         for j in range(int(h/2)):
             aux_pixel = img.getpixel((i, j))
             img.putpixel((i, j), img.getpixel((i, h-j-1)))
             img.putpixel((i, h-j-1), aux_pixel)
+
     return img
 
 def traspose(img):
@@ -294,9 +298,40 @@ def traspose(img):
     for i in range(h):
         for j in range(w):
             trasposed_img.putpixel((i, j), img.getpixel((j, i)))
-            j += 1
 
     return trasposed_img
+
+def escalate_value(img, x, y, operation):
+    escalated_img = Image.new('L', (x, y))
+
+
+    return escalated_img
+
+
+def escalate_percentage(img, x, y, option, operation):
+    w, h = img.size
+    escalated_img = None
+    
+    if option == 0:
+        escalated_img = Image.new('L', (round(x/100 * w), round(y/100 * h)))
+        w2, h2 = escalated_img.size
+
+        for i in range(w2):
+            for j in range(h2):
+                escalated_img.putpixel((i, j), img.getpixel((int(w * i/w2), int(h * j/h2))))
+
+    elif option == 1:
+        escalated_img = Image.new('L', (round(w / x/100), round(h / y/100)))
+        w2, h2 = escalated_img.size
+
+        for i in range(w):
+            for j in range(h):
+                escalated_img.putpixel((int(i/w * w2), int(j/h * h2)), img.getpixel((i, j)))
+
+    return escalated_img
+
+def interpole(img, final_img):
+    # def
 
 
 # new_img3 = specify_histogram(image, image2)

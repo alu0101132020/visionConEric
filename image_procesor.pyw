@@ -154,6 +154,18 @@ def geom_traspose():
         img = traspose(img)
         refreshImageVisualization()
 
+def geom_escalate_percentage():
+    global img
+    if (img != None):
+        img = escalate_percentage(img, 120, 120, 0, 0)
+        refreshImageVisualization()
+
+def geom_escalate_dimensions():
+    global img
+    if (img != None):
+        img = escalate_percentage(img, 120, 120, 1, 0)
+        refreshImageVisualization()
+
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
 
@@ -201,8 +213,8 @@ rotateMenu.add_command(label="...")
 
 scaleMenu=Menu(geometricMenu, tearoff=0)
 geometricMenu.add_cascade(label="Escalado", menu=scaleMenu)
-scaleMenu.add_command(label="Dimensiones")
-scaleMenu.add_command(label="Porcentajes")
+scaleMenu.add_command(label="Dimensiones", command=geom_escalate_dimensions)
+scaleMenu.add_command(label="Porcentajes", command=geom_escalate_percentage)
 
 menuBar.add_cascade(label="File", menu=fileMenu)
 menuBar.add_cascade(label="Properties", menu=propertyMenu)
