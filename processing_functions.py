@@ -198,6 +198,10 @@ def specify_histogram(img1, img2):
     accumulative_histogram2 = count_pixels_values_acumulative(img2)
     accumulative_histogram_normalized1 = normalize_histogram(accumulative_histogram1, img1)
     accumulative_histogram_normalized2 = normalize_histogram(accumulative_histogram2, img2)
+    print("hola1")
+    show_accumulative_histogram(img1)
+    print("hola2")
+    show_accumulative_histogram(img2)
     chart = [0] * 256
     for i in range(len(chart)):
         chart[i] = find_grayscale_value(accumulative_histogram_normalized1[i], accumulative_histogram_normalized2)
@@ -208,6 +212,7 @@ def specify_histogram(img1, img2):
         for j in range(h):
             new_img[i, j] = chart[img1.getpixel((i,j))]
     return img1
+    print("hola")
 
 def find_grayscale_value(normalized_ammount_of_pixels, accumulative_histogram_normalized):
     for i in range(len(accumulative_histogram_normalized)):
@@ -330,7 +335,7 @@ def escalate_percentage(img, x, y, option, operation):
 
     return escalated_img
 
-def interpole(img, final_img):
+# def interpole(img, final_img):
     # def
 
 

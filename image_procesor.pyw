@@ -18,40 +18,47 @@ if os.environ.get('DISPLAY','') == '':
 
 master = Tk()
 
-def exitApplication():
+def exit_application():
     value = messagebox.askquestion("Exit", "Would you like to exit the application?")
     if value == "yes" :
         master.destroy()
 
-def openFile():
-    file_path = filedialog.askopenfilename(title="Open File", filetypes=(("Imágenes", "*.jpg"), 
+def open_image():
+    file_path = filedialog.askopenfilename(title="Selecciona una imagen", filetypes=(("Imágenes", "*.jpg"), 
         ("Imágenes", "*.png"), ("Todos los ficheros", "*.*")))
-    global img_name
-    img_name = file_path.split('/')[-1]
+    # global img_name
+    # img_name = file_path.split('/')[-1]
     global img
     img = grayscale_check_and_convertion(file_path)
-    refreshImageVisualization()
+    refresh_image_visualization()
 
-def saveOurImage():
+def open_aux_image():
+    file_path = filedialog.askopenfilename(title="Selecciona una imagen", filetypes=(("Imágenes", "*.jpg"), 
+        ("Imágenes", "*.png"), ("Todos los ficheros", "*.*")))
+    # img_name = file_path.split('/')[-1]
+    img = grayscale_check_and_convertion(file_path)
+    return img
+
+def save_our_image():
     img.save(img_name)
 
-def saveAsOurImage():
+def save_as_our_image():
     img_name = filedialog.asksaveasfilename(confirmoverwrite=False)
     if (img_name.split('.')[-1] != 'jpg') :
         img_name += '.jpg'
     img.save(img_name)
 
-def refreshImageVisualization() :
+def refresh_image_visualization() :
     displayed_img = ImageTk.PhotoImage(img)
     l.configure(image=displayed_img)
     l.image = displayed_img
     master.mainloop()
 
-def absoluteHistogram():
+def absolute_histogram():
     if (img != None):
         show_absolute_histogram(img)
 
-def cumulativeHistogram():
+def accumulative_histogram():
     if (img != None):
         show_accumulative_histogram(img)
 
@@ -61,16 +68,16 @@ def editLineal():
         bright_value = simpledialog.askfloat("Input", "Introduzca el valor del brillo", parent=master)
         contrast_value = simpledialog.askfloat("Input", "Introduzca el valor del contraste", parent=master)
         img = conversion(img, bright_value, contrast_value)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
-def editGamma():    
+def edit_gamma():    
     global img
     if (img != None):
         gamma_value = simpledialog.askfloat("Input", "Introduzca el valor de gamma", parent=master)
         img = gamma_correction(img, gamma_value)
-        refreshImageVisualization()
+        refresh_image_visualization()
         
-def editBySections():
+def edit_by_sections():
     global img
     if (img != None):
         number_of_sections = simpledialog.askinteger("Input", "Introduzca el numero de las secciones", parent=master)
@@ -84,7 +91,7 @@ def editBySections():
                 fill_sections_array(i, sections, array)
 
             img = transformation_by_sections(img, array)
-            refreshImageVisualization()
+            refresh_image_visualization()
         else:
             error_string = 'Error introduciendo secciones.'
             error_string = "El inicio de la seccion no puede ser mayor que el final de una seccion o el final de una seccion no puede ser mayor que 255"
@@ -128,65 +135,71 @@ def fill_sections_array(index_start_of_section, sections, array) :
             array[j] = int(value)
         j += 1 
 
-def editEcualization():
+def edit_ecualization():
     global img
     if (img != None):
         img = equalize_histogram(img)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
+def edit_specify_histogram():
+    global img
+    if (img != None):
+        img2 = open_aux_image()
+        img = specify_histogram(img, img2)
+        refresh_image_visualization()
 # --------------------- SEGUNDA PARTE -----------------------
 
 def geom_vertical_mirror():
     global img
     if (img != None):
         img = vertical_mirror(img)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
 def geom_horizontal_mirror():
     global img
     if (img != None):
         img = horizontal_mirror(img)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
 def geom_traspose():
     global img
     if (img != None):
         img = traspose(img)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
 def geom_escalate_percentage():
     global img
     if (img != None):
         img = escalate_percentage(img, 120, 120, 0, 0)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
 def geom_escalate_dimensions():
     global img
     if (img != None):
         img = escalate_percentage(img, 120, 120, 1, 0)
-        refreshImageVisualization()
+        refresh_image_visualization()
 
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
 
 fileMenu=Menu(menuBar, tearoff=0)
-fileMenu.add_command(label="Abrir imagen", command=openFile)
-fileMenu.add_command(label="Guardar", command=saveOurImage)
-fileMenu.add_command(label="Guardar como...", command=saveAsOurImage)
-fileMenu.add_command(label="Cerrar", command=exitApplication)
+fileMenu.add_command(label="Abrir imagen", command=open_image)
+fileMenu.add_command(label="Guardar", command=save_our_image)
+fileMenu.add_command(label="Guardar como...", command=save_as_our_image)
+fileMenu.add_command(label="Cerrar", command=exit_application)
 
 propertyMenu=Menu(menuBar, tearoff=0)
-propertyMenu.add_command(label="Histograma abs.", command=absoluteHistogram)
-propertyMenu.add_command(label="Histograma acc.", command=cumulativeHistogram)
+propertyMenu.add_command(label="Histograma abs.", command=absolute_histogram)
+propertyMenu.add_command(label="Histograma acc.", command=accumulative_histogram)
 propertyMenu.add_command(label="Brillo")
 propertyMenu.add_command(label="Contraste")
 
 editMenu=Menu(menuBar, tearoff=0)
 editMenu.add_command(label="Lineal", command=editLineal)
-editMenu.add_command(label="Transformacion por tramos", command=editBySections)
-editMenu.add_command(label="Gamma", command=editGamma)
-editMenu.add_command(label="Ecualización", command=editEcualization)
-editMenu.add_command(label="Especificar hist.")
+editMenu.add_command(label="Transformacion por tramos", command=edit_by_sections)
+editMenu.add_command(label="Gamma", command=edit_gamma)
+editMenu.add_command(label="Ecualización", command=edit_ecualization)
+editMenu.add_command(label="Especificar hist.", command=edit_specify_histogram)
 
 differenceMenu=Menu(editMenu, tearoff=0)
 editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
