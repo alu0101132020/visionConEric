@@ -18,6 +18,12 @@ def is_grey_scale(img):
             if r != g != b: return False
     return True
 
+def grayscale_check_and_convertion(imageFileName):
+    img = Image.open(imageFileName)
+    if (not is_grey_scale(img)):
+        img = img.convert(mode='L')
+    return img
+
 # Function that counts for each possible value how many pixels are there, and returns the array that contains all that information.
 def count_pixels_values_relative(img):
     relative_histogram = [0] * 256
@@ -198,10 +204,10 @@ def specify_histogram(img1, img2):
     accumulative_histogram2 = count_pixels_values_acumulative(img2)
     accumulative_histogram_normalized1 = normalize_histogram(accumulative_histogram1, img1)
     accumulative_histogram_normalized2 = normalize_histogram(accumulative_histogram2, img2)
-    print("hola1")
-    show_accumulative_histogram(img1)
-    print("hola2")
-    show_accumulative_histogram(img2)
+    # print("hola1")
+    # show_accumulative_histogram(img1)
+    # print("hola2")
+    # show_accumulative_histogram(img2)
     chart = [0] * 256
     for i in range(len(chart)):
         chart[i] = find_grayscale_value(accumulative_histogram_normalized1[i], accumulative_histogram_normalized2)
@@ -212,7 +218,7 @@ def specify_histogram(img1, img2):
         for j in range(h):
             new_img[i, j] = chart[img1.getpixel((i,j))]
     return img1
-    print("hola")
+    # print("hola")
 
 def find_grayscale_value(normalized_ammount_of_pixels, accumulative_histogram_normalized):
     for i in range(len(accumulative_histogram_normalized)):
@@ -237,39 +243,6 @@ def gamma_correction(img, gamma_value):
             new_img[i, j] = chart[img.getpixel((i,j))]
     return img
 
-def differences_between_images(img1, img2):
-    img3 = img1.copy()
-    new_img = img3.load()
-    w,h = img3.size
-    for i in range(w):
-        for j in range(h):
-            new_img[i, j] = abs(img1.getpixel((i,j)) - img2.getpixel((i,j)))
-
-    relative_histogram = count_pixels_values_relative(img3)
-
-    accumulative_histogram = count_pixels_values_acumulative(img3)
-
-    show_histograms(image, relative_histogram, accumulative_histogram)
-
-    threshold_value = int(input('Introduce the threshold value: '))
-
-    new_img = img3.load()
-    img3 = img3.convert(mode='RGB')
-    w,h = img3.size
-    for i in range(w):
-        for j in range(h):
-            if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)):
-                img3.putpixel((i,j), (255, 0, 0))
-            else:
-                img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
-
-    return img3
-
-def grayscale_check_and_convertion(imageFileName):
-    img = Image.open(imageFileName)
-    if (not is_grey_scale(img)):
-        img = img.convert(mode='L')
-    return img
 
 # --------------------- SEGUNDA PARTE -----------------------
 

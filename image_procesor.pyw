@@ -6,6 +6,7 @@ import webbrowser
 import matplotlib.pyplot as plt
 import sys
 from statistics  import stdev
+from functools import partial
 from PIL import Image, ImageTk
 import sklearn
 import math
@@ -147,6 +148,33 @@ def edit_specify_histogram():
         img2 = open_aux_image()
         img = specify_histogram(img, img2)
         refresh_image_visualization()
+
+def edit_differences_between_images(option = 0):
+    global img
+    if (img != None):
+        img2 = open_aux_image()
+        img = differences_between_images(img, img2, option)
+        refresh_image_visualization()
+
+def differences_between_images(img1, img2, option=0):
+    img3 = img1.copy()
+    new_img = img3.load()
+    w,h = img3.size
+    for i in range(w):
+        for j in range(h):
+            new_img[i, j] = abs(img1.getpixel((i,j)) - img2.getpixel((i,j)))
+
+    if option == 1:
+        # show_absolute_histogram(img3)
+        threshold_value = simpledialog.askinteger("Input", "Introduce el valor umbral para ver diferencias.", parent=master)
+        img3 = img3.convert(mode='RGB')
+        for i in range(w):
+            for j in range(h):
+                if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)):
+                    img3.putpixel((i,j), (255, 0, 0))
+                else:
+                    img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
+    return img3
 # --------------------- SEGUNDA PARTE -----------------------
 
 def geom_vertical_mirror():
@@ -203,8 +231,8 @@ editMenu.add_command(label="Especificar hist.", command=edit_specify_histogram)
 
 differenceMenu=Menu(editMenu, tearoff=0)
 editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
-differenceMenu.add_command(label="Diferencia")
-differenceMenu.add_command(label="Mostrar diferencias")
+differenceMenu.add_command(label="Crear imagen diferencia", command=edit_differences_between_images)
+# differenceMenu.add_command(label="Mostrar diferencias", command=partial(edit_differences_between_images, 1))
 
 helpMenu=Menu(menuBar, tearoff=0)
 helpMenu.add_command(label="License")
