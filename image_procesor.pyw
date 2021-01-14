@@ -27,8 +27,8 @@ def exit_application():
 def open_image():
     file_path = filedialog.askopenfilename(title="Selecciona una imagen", filetypes=(("Imágenes", "*.jpg"), 
         ("Imágenes", "*.png"), ("Todos los ficheros", "*.*")))
-    # global img_name
-    # img_name = file_path.split('/')[-1]
+    global img_name
+    img_name = file_path.split('/')[-1]
     global img
     img = grayscale_check_and_convertion(file_path)
     refresh_image_visualization()
@@ -36,7 +36,7 @@ def open_image():
 def open_aux_image():
     file_path = filedialog.askopenfilename(title="Selecciona una imagen", filetypes=(("Imágenes", "*.jpg"), 
         ("Imágenes", "*.png"), ("Todos los ficheros", "*.*")))
-    # img_name = file_path.split('/')[-1]
+    img_name = file_path.split('/')[-1]
     img = grayscale_check_and_convertion(file_path)
     return img
 
@@ -165,7 +165,7 @@ def differences_between_images(img1, img2, option=0):
             new_img[i, j] = abs(img1.getpixel((i,j)) - img2.getpixel((i,j)))
 
     if option == 1:
-        # show_absolute_histogram(img3)
+        show_absolute_histogram(img3)
         threshold_value = simpledialog.askinteger("Input", "Introduce el valor umbral para ver diferencias.", parent=master)
         img3 = img3.convert(mode='RGB')
         for i in range(w):
@@ -232,7 +232,7 @@ editMenu.add_command(label="Especificar hist.", command=edit_specify_histogram)
 differenceMenu=Menu(editMenu, tearoff=0)
 editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
 differenceMenu.add_command(label="Crear imagen diferencia", command=edit_differences_between_images)
-# differenceMenu.add_command(label="Mostrar diferencias", command=partial(edit_differences_between_images, 1))
+differenceMenu.add_command(label="Mostrar diferencias", command=partial(edit_differences_between_images, 1))
 
 helpMenu=Menu(menuBar, tearoff=0)
 helpMenu.add_command(label="License")

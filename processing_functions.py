@@ -218,7 +218,6 @@ def specify_histogram(img1, img2):
         for j in range(h):
             new_img[i, j] = chart[img1.getpixel((i,j))]
     return img1
-    # print("hola")
 
 def find_grayscale_value(normalized_ammount_of_pixels, accumulative_histogram_normalized):
     for i in range(len(accumulative_histogram_normalized)):
