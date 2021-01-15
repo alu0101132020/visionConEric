@@ -165,7 +165,7 @@ def differences_between_images(img1, img2, option=0):
             new_img[i, j] = abs(img1.getpixel((i,j)) - img2.getpixel((i,j)))
 
     if option == 1:
-        show_absolute_histogram(img3)
+        # show_absolute_histogram(img3)
         threshold_value = simpledialog.askinteger("Input", "Introduce el valor umbral para ver diferencias.", parent=master)
         img3 = img3.convert(mode='RGB')
         for i in range(w):
@@ -198,13 +198,26 @@ def geom_traspose():
 def geom_escalate_percentage():
     global img
     if (img != None):
-        img = escalate_percentage(img, 120, 120, 0, 0)
+        img = escalate_percentage(img, 80, 80, 0)
         refresh_image_visualization()
 
 def geom_escalate_dimensions():
     global img
     if (img != None):
-        img = escalate_percentage(img, 120, 120, 1, 0)
+        img = escalate_dimensions(img, 120, 120, 0)
+        refresh_image_visualization()
+
+def geom_rotate(times=0):
+    global img
+    if (img != None):
+        for i in range(times):
+            img = rotate_img(img)
+        refresh_image_visualization()
+
+def geom_freestyle_420_xXx_rotation():
+    global img
+    if (img != None):
+        img = rotate_freestyle_img(img, degrees)
         refresh_image_visualization()
 
 menuBar=Menu(master)
@@ -247,10 +260,10 @@ mirrorMenu.add_command(label="Traspuesta", command=geom_traspose)
 
 rotateMenu=Menu(geometricMenu, tearoff=0)
 geometricMenu.add_cascade(label="Rotacion", menu=rotateMenu)
-rotateMenu.add_command(label="90º")
-rotateMenu.add_command(label="180º")
-rotateMenu.add_command(label="270º")
-rotateMenu.add_command(label="...")
+rotateMenu.add_command(label="90º", command=partial(geom_rotate, 1))
+rotateMenu.add_command(label="180º", command=partial(geom_rotate, 2))
+rotateMenu.add_command(label="270º", command=partial(geom_rotate, 3))
+rotateMenu.add_command(label="...", command=geom_freestyle_420_xXx_rotation)
 
 scaleMenu=Menu(geometricMenu, tearoff=0)
 geometricMenu.add_cascade(label="Escalado", menu=scaleMenu)

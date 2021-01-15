@@ -278,37 +278,79 @@ def traspose(img):
 
     return trasposed_img
 
-def escalate_value(img, x, y, operation):
+def escalate_dimensions(img, x, y, operation):
     escalated_img = Image.new('L', (x, y))
 
+    if operation == 0:
+        interpole_VMP(img, escalated_img)
+    elif operation == 1:
+        interpole_bilineal(img, escalated_img)
 
     return escalated_img
 
 
-def escalate_percentage(img, x, y, option, operation):
+def escalate_percentage(img, x, y, operation):
     w, h = img.size
-    escalated_img = None
-    
-    if option == 0:
-        escalated_img = Image.new('L', (round(x/100 * w), round(y/100 * h)))
-        w2, h2 = escalated_img.size
+    escalated_img = Image.new('L', (math.floor(x/100 * w), math.floor(y/100 * h)))
 
-        for i in range(w2):
-            for j in range(h2):
-                escalated_img.putpixel((i, j), img.getpixel((int(w * i/w2), int(h * j/h2))))
-
-    elif option == 1:
-        escalated_img = Image.new('L', (round(w / x/100), round(h / y/100)))
-        w2, h2 = escalated_img.size
-
-        for i in range(w):
-            for j in range(h):
-                escalated_img.putpixel((int(i/w * w2), int(j/h * h2)), img.getpixel((i, j)))
+    if operation == 0:
+        interpole_VMP(img, escalated_img)
+    elif operation == 1:
+        interpole_bilineal(img, escalated_img)
 
     return escalated_img
 
-# def interpole(img, final_img):
-    # def
+def interpole_VMP(img, final_img):
+    w, h = img.size
+    w2, h2 = final_img.size
+
+    for i in range(w2):
+        for j in range(h2):
+            final_img.putpixel((i, j), img.getpixel((math.floor(w * i/w2), math.floor(h * j/h2))))
+
+    return final_img
+
+def interpole_bilineal(img, final_img):
+    w, h = img.size
+    w2, h2 = final_img.size
+
+    for i in range(w2):
+        for j in range(h2):
+            w_floor = math.floor(w * i/w2)
+            h_floor = math.floor(h * j/h2)
+
+            if (math.ceil(h * j/h2) >= h):
+                h_ceil = math.floor(h * j/h2)
+            else:
+                h_ceil = math.ceil(h * j/h2)
+
+            if(math.ceil(w * i/w2) >= w):
+                w_ceil = math.floor(w * i/w2)
+            else:
+                w_ceil = math.ceil(w * i/w2)
+
+            A = img.getpixel((w_floor, h_ceil))
+            B = img.getpixel((w_ceil, h_ceil))
+            C = img.getpixel((w_floor, h_floor))
+            D = img.getpixel((w_ceil, h_floor))
+            p = (w * i/w2) - w_floor
+            q = (h * j/h2) - h_floor
+
+            value = round(C + (D - C) * p + (A - C) * q + (B + C - A - D) * p * q)
+            final_img.putpixel((i, j), value)
+
+    return final_img
+
+def rotate_img(img):
+    w, h = img.size
+    rotated_img = Image.new('L', (h, w))
+    img = img.convert(mode='L')
+
+    for i in range(h):
+        for j in range(w):
+            rotated_img.putpixel((w - j - 1, i), img.getpixel((i, j)))
+
+    return rotated_img
 
 
 # new_img3 = specify_histogram(image, image2)
