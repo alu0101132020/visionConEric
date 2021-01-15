@@ -243,7 +243,7 @@ def gamma_correction(img, gamma_value):
     return img
 
 
-# --------------------- SEGUNDA PARTE -----------------------
+# --------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -----------------------
 
 def horizontal_mirror(img):
     w, h = img.size
@@ -351,15 +351,5 @@ def rotate_img(img):
             rotated_img.putpixel((w - j - 1, i), img.getpixel((i, j)))
 
     return rotated_img
-
-
-# new_img3 = specify_histogram(image, image2)
-
-# imageFileSpecified = array[0] + '_specified.jpg' 
-# new_img3.save(imageFileSpecified)
-
-# new_img5 = differences_between_images(image, image2)
-# imageFileDifferences = array[0] + '_differences.jpg' 
-# new_img5.save(imageFileDifferences)
 
 # Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales

@@ -175,7 +175,8 @@ def differences_between_images(img1, img2, option=0):
                 else:
                     img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
     return img3
-# --------------------- SEGUNDA PARTE -----------------------
+    
+# --------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -----------------------
 
 def geom_vertical_mirror():
     global img
