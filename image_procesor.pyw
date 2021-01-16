@@ -199,6 +199,10 @@ def geom_traspose():
 def geom_escalate_percentage():
     global img
     if (img != None):
+        panel = Tk()
+        panel.title("Introduzca los valores")
+        panel.geometry("250x250")
+        panel.iconbitmap('C:/Users/ericf/Desktop/ULL/VPC/visionConEric/ull.ico')
         img = escalate_percentage(img, 80, 80, 0)
         refresh_image_visualization()
 
@@ -218,7 +222,7 @@ def geom_rotate(times=0):
 def geom_freestyle_420_xXx_rotation():
     global img
     if (img != None):
-        img = rotate_freestyle_img(img, degrees)
+        img = rotate_freestyle_img(img, 211)
         refresh_image_visualization()
 
 menuBar=Menu(master)

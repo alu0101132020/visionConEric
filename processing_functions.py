@@ -7,6 +7,7 @@ from statistics  import stdev
 from PIL import Image
 import sklearn
 import math
+from math import *
 
 # Function that asserts that the image is grayscale.
 def is_grey_scale(img):
@@ -94,7 +95,7 @@ def get_contrast(img):
     summ = 0
     for i in range(len(relative_histogram)):
         summ += relative_histogram[i] * ((i - mean)**2)
-    summ = math.sqrt(summ / total_pixels)
+    summ = sqrt(summ / total_pixels)
     return summ
 
 def get_entropy(img):
@@ -105,7 +106,7 @@ def get_entropy(img):
 
     for i in accumulative_histogram_normalized:
         if i != 0:
-            log_result = math.log2(i)
+            log_result = log2(i)
             acc += i * log_result   
     
     entropy = acc * -1
@@ -291,7 +292,7 @@ def escalate_dimensions(img, x, y, operation):
 
 def escalate_percentage(img, x, y, operation):
     w, h = img.size
-    escalated_img = Image.new('L', (math.floor(x/100 * w), math.floor(y/100 * h)))
+    escalated_img = Image.new('L', (floor(x/100 * w), floor(y/100 * h)))
 
     if operation == 0:
         interpole_VMP(img, escalated_img)
@@ -306,7 +307,7 @@ def interpole_VMP(img, final_img):
 
     for i in range(w2):
         for j in range(h2):
-            final_img.putpixel((i, j), img.getpixel((math.floor(w * i/w2), math.floor(h * j/h2))))
+            final_img.putpixel((i, j), img.getpixel((round(w * i/w2), round(h * j/h2))))
 
     return final_img
 
@@ -316,18 +317,18 @@ def interpole_bilineal(img, final_img):
 
     for i in range(w2):
         for j in range(h2):
-            w_floor = math.floor(w * i/w2)
-            h_floor = math.floor(h * j/h2)
+            w_floor = floor(w * i/w2)
+            h_floor = floor(h * j/h2)
 
-            if (math.ceil(h * j/h2) >= h):
-                h_ceil = math.floor(h * j/h2)
+            if (ceil(h * j/h2) >= h):
+                h_ceil = floor(h * j/h2)
             else:
-                h_ceil = math.ceil(h * j/h2)
+                h_ceil = ceil(h * j/h2)
 
-            if(math.ceil(w * i/w2) >= w):
-                w_ceil = math.floor(w * i/w2)
+            if(ceil(w * i/w2) >= w):
+                w_ceil = floor(w * i/w2)
             else:
-                w_ceil = math.ceil(w * i/w2)
+                w_ceil = ceil(w * i/w2)
 
             A = img.getpixel((w_floor, h_ceil))
             B = img.getpixel((w_ceil, h_ceil))
@@ -350,6 +351,59 @@ def rotate_img(img):
         for j in range(w):
             rotated_img.putpixel((w - j - 1, i), img.getpixel((i, j)))
 
+    return rotated_img
+
+def rotate_freestyle_img(img, rotate_degrees):
+    w, h = img.size
+    rotate_degrees = radians(rotate_degrees)
+
+    A = [(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), (0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    B = [((w-1) * cos(rotate_degrees) - 0 * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    C = [((w-1) * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    D = [(0 * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), (0 * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    points = [A, B, C, D]
+
+    min_x = sys.maxsize
+    min_y = sys.maxsize
+    max_x = -sys.maxsize - 1
+    max_y = -sys.maxsize - 1
+
+    for point in points:
+        if point[0] < min_x:
+            min_x = point[0]
+        if point[1] < min_y:
+            min_y = point [1]
+        if point[0] > max_x:
+            max_x = point[0]
+        if point[1] > max_y:
+            max_y = point [1]
+
+    print(A, B, C, D, min_x, min_y, max_x, max_y)
+    new_w = ceil(abs(max_x - min_x))
+    new_h = ceil(abs(max_y - min_y))
+    print(new_w, new_h)
+    print(max_x)
+
+    rotated_img = Image.new('RGB', (new_w, new_h))
+
+    # for point in points:
+    #     if min_x < 0:
+    #         point[0] -= min_x
+    #     if min_y < 0:
+    #         point[1] -= min_y
+    
+    for i in range(new_w):
+        for j in range(new_h):
+            x_value = round(i * cos(-rotate_degrees) - j * sin(-rotate_degrees))
+            y_value = round(i * sin(-rotate_degrees) + j * cos(-rotate_degrees))
+            # print(x_value, y_value)
+
+            if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
+                # print("entra", x_value, y_value, i, j, i - int(min_x), j - int(min_y))
+                rotated_img.putpixel((i + int(min_x), j + int(min_y)), (img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value))))
+            else:
+                rotated_img.putpixel((i, j), (0,0,255))
+            
     return rotated_img
 
 # Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales
