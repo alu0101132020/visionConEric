@@ -466,4 +466,4 @@ def rotate_freestyle_img(img, rotate_degrees):
             
 #     return rotated_img
 
-# # Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales
+# mostrar contraste y brillo, seccionar imágenes, + opcionales
