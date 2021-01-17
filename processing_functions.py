@@ -275,16 +275,85 @@ def get_ROI(img, first_point, second_point):
         if point[1] > max_y:
             max_y = point [1]
     w, h = img.size
+    new_img = Image.new('L', (max_x - min_x, max_y - min_y))
     if (min_x >= 0 and max_x < w) and (min_y >= 0 and max_y < h):
         i = min_x
         while i < max_x:
             j = min_y
             while j < max_y:
-                j+=1
+                new_img.putpixel((i - min_x, j - min_y), img.getpixel((i, j)))
+                j += 1
             i += 1
+        return new_img
     else:
         print("Los valores no son válidos.")
 
+curr_pos = 0
+list_of_plots = []
+ax = None
+fig = None
+
+def key_event(e):
+    global curr_pos
+    global ax
+    global fig
+
+    if e.key == "right":
+        curr_pos = curr_pos + 1
+    elif e.key == "left":
+        curr_pos = curr_pos - 1
+    else:
+        return
+    curr_pos = curr_pos % len(list_of_plots)
+    ax.cla()
+    plt.title(list_of_plots[curr_pos][2])
+    ax.plot(list_of_plots[curr_pos][0], list_of_plots[curr_pos][1])
+    fig.canvas.draw()
+
+def show_list_of_histograms(list_of_histograms):
+    global list_of_plots
+    global ax
+    global fig
+    list_of_plots = list_of_histograms
+    fig = plt.figure()
+    fig.canvas.mpl_connect('key_press_event', key_event)
+    ax = fig.add_subplot(111)
+    plt.title(list_of_plots[0][2])
+    ax.plot(list_of_plots[0][0], list_of_plots[0][1])
+    plt.show()
+
+def digitalization(img, sampling_value, cuantification_bits):
+    chart = y_axis_setter()
+    for i in range(len(chart)):
+        chart[i] = (255 / ((1 << cuantification_bits) - 1))
+    w, h = img.size
+    i = 0
+    while i < w:
+        j = 0
+        while j < h:
+            k = 0
+            summ = 0
+            while k < sampling_value:   
+                l = 0
+                while l < sampling_value:
+                    if (i + k < w and j + l < h):
+                        summ += img.getpixel((i + k, j + l))
+                    l+= 1
+                k += 1
+            k = 0
+            summ /= (sampling_value * 2) 
+            while k < sampling_value:
+                l = 0
+                while l < sampling_value:
+                    print(i+k, j + l, h, w)
+                    if (((i + k) < w) and ((j + l) < h)):
+                        img.putpixel((i + k, j + l), int(chart[int(summ)]))
+                    l+= 1
+                k += 1
+            j += sampling_value
+        i += sampling_value
+
+    return img
 
 
 # --------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -----------------------
@@ -396,117 +465,66 @@ def rotate_img(img):
 
     return rotated_img
 
-def rotate_freestyle_img(img, rotate_degrees):
-    w, h = img.size
-    rotate_degrees = radians(rotate_degrees)
+# def rotate_free_angle_img(img, rotate_degrees):
+    # w, h = img.size
+    # rotate_degrees = radians(rotate_degrees)
 
-    global A, B, C, D
+    # global A, B, C, D
 
-    A = [round(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
-    B = [round(w * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(w * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
-    C = [round(w * cos(rotate_degrees) - h * sin(rotate_degrees)), round(w * sin(rotate_degrees) + h * cos(rotate_degrees))]
-    D = [round(0 * cos(rotate_degrees) - h * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + h * cos(rotate_degrees))]
-    points = [A, B, C, D]
+    # A = [round(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    # B = [round(w * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(w * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    # C = [round(w * cos(rotate_degrees) - h * sin(rotate_degrees)), round(w * sin(rotate_degrees) + h * cos(rotate_degrees))]
+    # D = [round(0 * cos(rotate_degrees) - h * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + h * cos(rotate_degrees))]
+    # points = [A, B, C, D]
 
-    min_x = sys.maxsize
-    min_y = sys.maxsize
-    max_x = -sys.maxsize - 1
-    max_y = -sys.maxsize - 1
-
-    for point in points:
-        if point[0] < min_x:
-            min_x = point[0]
-        if point[1] < min_y:
-            min_y = point [1]
-        if point[0] > max_x:
-            max_x = point[0]
-        if point[1] > max_y:
-            max_y = point [1]
-
-    print(A, B, C, D, min_x, min_y)
-    new_w = max_x - min_x
-    new_h = max_y - min_y
-    print(new_w, new_h)
-
-    rotated_img = Image.new('RGB', (new_w, new_h))
+    # min_x = sys.maxsize
+    # min_y = sys.maxsize
+    # max_x = -sys.maxsize - 1
+    # max_y = -sys.maxsize - 1
 
     # for point in points:
-    #     if min_x < 0:
-    #         point[0] -= min_x
-    #     if min_y < 0:
-    #         point[1] -= min_y
+    #     if point[0] < min_x:
+    #         min_x = point[0]
+    #     if point[1] < min_y:
+    #         min_y = point [1]
+    #     if point[0] > max_x:
+    #         max_x = point[0]
+    #     if point[1] > max_y:
+    #         max_y = point [1]
+
+    # print(A, B, C, D, min_x, min_y)
+    # new_w = max_x - min_x
+    # new_h = max_y - min_y
+    # print(new_w, new_h)
+
+    # rotated_img = Image.new('RGB', (new_w, new_h))
+
+    # # for point in points:
+    # #     if min_x < 0:
+    # #         point[0] -= min_x
+    # #     if min_y < 0:
+    # #         point[1] -= min_y
     
-    for i in range(w):
-        for j in range(h):
-            x_value = round(i * cos(rotate_degrees) - j * sin(rotate_degrees))
-            y_value = round(i * sin(rotate_degrees) + j * cos(rotate_degrees))
-            rotated_img.putpixel((x_value - min_x - 1, y_value), (img.getpixel((i, j)), img.getpixel((i, j)), img.getpixel((i, j))))
+    # for i in range(w):
+    #     for j in range(h):
+    #         x_value = round(i * cos(rotate_degrees) - j * sin(rotate_degrees))
+    #         y_value = round(i * sin(rotate_degrees) + j * cos(rotate_degrees))
+    #         rotated_img.putpixel((x_value - min_x - 1, y_value), (img.getpixel((i, j)), img.getpixel((i, j)), img.getpixel((i, j))))
             
-    # for i in range(new_w):
-    #     for j in range(new_h):
-    #         x_value = round(i * cos(-rotate_degrees) - j * sin(-rotate_degrees))
-    #         y_value = round(i * sin(-rotate_degrees) + j * cos(-rotate_degrees))
-    #         # print(x_value, y_value)
+    # # for i in range(new_w):
+    # #     for j in range(new_h):
+    # #         x_value = round(i * cos(-rotate_degrees) - j * sin(-rotate_degrees))
+    # #         y_value = round(i * sin(-rotate_degrees) + j * cos(-rotate_degrees))
+    # #         # print(x_value, y_value)
 
-    #         if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
-    #             # print("entra", x_value, y_value, i, j, i - int(min_x), j - int(min_y))
-    #             rotated_img.putpixel((i + int(min_x), j + int(min_y)), (img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value))))
-    #         else:
-    #             rotated_img.putpixel((i, j), (0,0,255))
+    # #         if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
+    # #             # print("entra", x_value, y_value, i, j, i - int(min_x), j - int(min_y))
+    # #             rotated_img.putpixel((i + int(min_x), j + int(min_y)), (img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value))))
+    # #         else:
+    # #             rotated_img.putpixel((i, j), (0,0,255))
 
-    return rotated_img
+    # return rotated_img
 
 # Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales
-
-# def rotate_freestyle_img(img, rotate_degrees):
-#     w, h = img.size
-#     rotate_degrees = radians(rotate_degrees)
-
-#     global A, B, C, D
-
-#     A = [round(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
-#     B = [round(w * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(w * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
-#     C = [round(w * cos(rotate_degrees) - h * sin(rotate_degrees)), round(w * sin(rotate_degrees) + h * cos(rotate_degrees))]
-#     D = [round(0 * cos(rotate_degrees) - h * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + h * cos(rotate_degrees))]
-#     points = [A , B, C, D]
-
-#     min_x = sys.maxsize
-#     min_y = sys.maxsize
-#     max_x = -sys.maxsize - 1
-#     max_y = -sys.maxsize - 1
-
-#     for point in points:
-#         if point[0] < min_x:
-#             min_x = point[0]
-#         if point[1] < min_y:
-#             min_y = point [1]
-#         if point[0] > max_x:
-#             max_x = point[0]
-#         if point[1] > max_y:
-#             max_y = point [1]
-
-#     print(A, B, C, D, min_x, min_y)
-#     new_w = max_x - min_x
-#     new_h = max_y - min_y
-#     print(new_w, new_h)
-
-#     rotated_img = Image.new('RGB', (new_w, new_h))
-
-#     # for point in points:
-#     #     if min_x < 0:
-#     #         point[0] -= min_x
-#     #     if min_y < 0:
-#     #         point[1] -= min_y
-    
-#     for i in range(w):
-#         for j in range(h):
-#             x_value = round(i * cos(rotate_degrees) - j * sin(rotate_degrees))
-#             y_value = round(i * sin(rotate_degrees) + j * cos(rotate_degrees))
-#             # if (x_value > 0 and x_value < w) and (y_value > 0 and y_value < h):
-#             rotated_img.putpixel((x_value - min_x - 1, y_value), (img.getpixel((i, j)), img.getpixel((i, j)), img.getpixel((i, j))))
-#             # else:
-#             #     rotated_img.putpixel((i, j), (0,0,255))
-            
-#     return rotated_img
 
 # mostrar contraste y brillo, seccionar imágenes, + opcionales

@@ -26,6 +26,8 @@ def exit_application():
         master.destroy()
 
 def open_image():
+    global current_angle
+    current_angle = 0
     file_path = filedialog.askopenfilename(title="Selecciona una imagen", filetypes=(("Imágenes", "*.jpg"), 
         ("Imágenes", "*.png"), ("Todos los ficheros", "*.*")))
     global img_name
@@ -51,7 +53,8 @@ def save_as_our_image():
     img.save(img_name)
 
 def refresh_image_visualization() :
-    displayed_img = ImageTk.PhotoImage(img)
+    rotated_img = rotate_free_angle_img(img, current_angle, 0)
+    displayed_img = ImageTk.PhotoImage(rotated_img)
     l.configure(image=displayed_img)
     l.image = displayed_img
     master.mainloop()
@@ -143,6 +146,14 @@ def edit_ecualization():
         img = equalize_histogram(img)
         refresh_image_visualization()
 
+def edit_ecualization():
+    global img
+    if (img != None):
+        sampling_value = simpledialog.askinteger("Input", "Nuevo tamaño de muestreo", parent=master)
+        number_of_bits_to_cuantify = simpledialog.askinteger("Input", "Introduzca el número de bits en el que desearía cuantificar (menos de 8)", parent=master)
+        img = digitalization(img, sampling_value, number_of_bits_to_cuantify)
+        refresh_image_visualization()
+
 def edit_specify_histogram():
     global img
     if (img != None):
@@ -178,10 +189,17 @@ def differences_between_images(img1, img2, option=0):
     return img3
     
 
-def edit_ROI():
-    master.bind("<Button 1>", get_origin)
-    master.bind("<Button 1>", get_ending)
-    print_ROI
+def show_ROI():
+    global img
+    if (img != None):
+        first_point = [0, 0]
+        second_point = [0, 0]
+        first_point[0] = simpledialog.askinteger("Input", "Coordenada x del primer punto", parent=master)
+        first_point[1] = simpledialog.askinteger("Input", "Coordenada y del primer punto", parent=master)
+        second_point[0] = simpledialog.askinteger("Input", "Coordenada x del segundo punto", parent=master)
+        second_point[1] = simpledialog.askinteger("Input", "Coordenada y del segundo punto", parent=master)
+        img = get_ROI(img, first_point, second_point)
+        refresh_image_visualization()
 
 def get_origin(eventorigin):
     x_origin = eventorigin.x
@@ -191,8 +209,6 @@ def get_ending(eventorigin):
     x_ending = eventorigin.x
     y_ending = eventorigin.y
 
-def print_ROI():
-    print(x_origin, y_origin, x_ending, y_ending)
 
 def callback(event):
     print("clicked at: ", event.x, event.y)
@@ -236,6 +252,8 @@ def profile_of_image(img, first_point, second_point):
         if point[1] > max_y:
             max_y = point [1]
     w, h = img.size
+
+    # --- CÁLCULO DE PERFIL Y SU DERIVADA
     if (min_x >= 0 and max_x < w) and (min_y >= 0 and max_y < h):
         if first_point[0] < second_point[0]:
             A = second_point[1] - first_point[1] / second_point[0] - first_point[0]
@@ -266,29 +284,32 @@ def profile_of_image(img, first_point, second_point):
 
         histogram_of_profile_VMP = histogram_of_profile.copy()
         histogram_of_profile_VMP_derivated = histogram_of_profile.copy()
+        # --- CÁLCULO DE PERFIL SUAVIZADO
         i = 1
         histogram_of_profile_VMP[0] = int((histogram_of_profile[1] + histogram_of_profile[0]) / 2)
-        histogram_of_profile_VMP_derivated[0] = int((histogram_of_profile_derivated[1] + histogram_of_profile_derivated[0]) / 2)
         while i < len(histogram_of_profile) - 1:
             j = i - 1
             summ = 0
-            summ_derivated = 0
             while j < i + 1:
                 summ += histogram_of_profile[j]
-                summ_derivated += histogram_of_profile_derivated[j]
                 j += 1
             summ /= 3
-            summ_derivated /= 3
             histogram_of_profile_VMP[i] = summ
-            histogram_of_profile_VMP_derivated[i] = summ_derivated
             i += 1
         histogram_of_profile_VMP[i] = int((histogram_of_profile[i] + histogram_of_profile[i - 1]) / 2)
-        histogram_of_profile_VMP_derivated[i] = int((histogram_of_profile_derivated[i] + histogram_of_profile_derivated[i - 1]) / 2)
+        # --- CÁLCULO DE PERFIL DERIVADO Y SUAVIZADO
+        i = 1
+        while i < len(histogram_of_profile) - 1:
+            histogram_of_profile_VMP_derivated[i] = histogram_of_profile_VMP[i + 1] - histogram_of_profile_VMP[i]
+            i += 1
+        histogram_of_profile_VMP_derivated[i] = histogram_of_profile_VMP[i] - histogram_of_profile_VMP[i - 1]
+        histogram_of_profile_VMP_derivated[0] = histogram_of_profile_VMP[1] - histogram_of_profile_VMP[0]
 
-        show_histogram_from_list(histogram_of_profile)
-        show_histogram_from_list(histogram_of_profile_derivated)
-        show_histogram_from_list(histogram_of_profile_VMP)
-        show_histogram_from_list(histogram_of_profile_VMP_derivated)
+        x_axis_plot = y_axis_setter_from_list(histogram_of_profile)
+        list_of_histograms = [(x_axis_plot, histogram_of_profile, "Perfil"), (x_axis_plot, histogram_of_profile_VMP, "Perfil suavizado"),
+            (x_axis_plot, histogram_of_profile_derivated, "Derivada"), (x_axis_plot, histogram_of_profile_derivated, "Derivada suavizada")]
+        show_list_of_histograms(list_of_histograms)
+
         return img
     else:
         print("Los valores no son válidos.")
@@ -317,10 +338,6 @@ def geom_traspose():
 def geom_escalate_percentage():
     global img
     if (img != None):
-        panel = Tk()
-        panel.title("Introduzca los valores")
-        panel.geometry("250x250")
-        # panel.iconbitmap('C:/Users/ericf/Desktop/ULL/VPC/visionConEric/ull.ico')
         img = escalate_percentage(img, 80, 80, 0)
         refresh_image_visualization()
 
@@ -337,11 +354,95 @@ def geom_rotate(times=0):
             img = rotate_img(img)
         refresh_image_visualization()
 
-def geom_freestyle_420_xXx_rotation():
+def geom_change_rotation():
     global img
+    global current_angle
     if (img != None):
-        img = rotate_freestyle_img(img, 211)
+        new_angle = simpledialog.askfloat("Input", "Introduzca el valor del brillo", parent=master)
+        current_angle += new_angle
         refresh_image_visualization()
+
+def rotate_free_angle_img(img, rotate_degrees, operation = 0):
+    w, h = img.size
+
+    global A, B, C, D
+
+    A = [(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), (0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    B = [((w-1) * cos(rotate_degrees) - 0 * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    C = [((w-1) * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    D = [(0 * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), (0 * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    points = [A, B, C, D]
+
+    min_x = sys.maxsize
+    min_y = sys.maxsize
+    max_x = -sys.maxsize - 1
+    max_y = -sys.maxsize - 1
+
+    for point in points:
+        if point[0] < min_x:
+            min_x = point[0]
+        if point[1] < min_y:
+            min_y = point [1]
+        if point[0] > max_x:
+            max_x = point[0]
+        if point[1] > max_y:
+            max_y = point [1]
+
+    new_w = ceil(round(max_x - min_x))
+    new_h = ceil(round(max_y - min_y))
+    rotated_img = Image.new('L', (new_w, new_h))
+    if operation == 0:
+        interpole_VPM_rotation(img, rotated_img, rotate_degrees, min_x, min_y)
+    elif operation == 1:
+        interpole_bilineal_rotation(img, rotated_img, rotate_degrees, min_x, min_y)
+
+    return rotated_img
+
+def interpole_VPM_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
+    w, h = img.size
+    w2, h2 = rotated_img.size
+    for i in range(w2):
+        for j in range(h2):
+            x_value = round((i + min_x) * cos(-rotation_degrees) - (j + min_y) * sin(-rotation_degrees))
+            y_value = round((i + min_x) * sin(-rotation_degrees) + (j + min_y) * cos(-rotation_degrees))
+            if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
+                rotated_img.putpixel((i, j), (img.getpixel((x_value, y_value))))
+
+    return rotate_img
+
+def interpole_bilineal_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
+    w, h = img.size
+    w2, h2 = rotated_img.size
+
+    for i in range(w2):
+        for j in range(h2):
+            x_value = ((i + min_x) * cos(-rotation_degrees) - (j + min_y) * sin(-rotation_degrees))
+            y_value = ((i + min_x) * sin(-rotation_degrees) + (j + min_y) * cos(-rotation_degrees))
+            w_floor = floor(x_value)
+            h_floor = floor(y_value)
+
+            if (ceil(y_value) >= h):
+                h_ceil = floor(y_value)
+            else:
+                h_ceil = ceil(y_value)
+
+            if(ceil(x_value) >= w):
+                w_ceil = floor(x_value)
+            else:
+                w_ceil = ceil(x_value)
+            
+            if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
+                A = img.getpixel((w_floor, h_ceil))
+                B = img.getpixel((w_ceil, h_ceil))
+                C = img.getpixel((w_floor, h_floor))
+                D = img.getpixel((w_ceil, h_floor))
+                p = (x_value) - w_floor
+                q = (y_value) - h_floor
+
+                value = round(C + (D - C) * p + (A - C) * q + (B + C - A - D) * p * q)
+                rotated_img.putpixel((i, j), value)
+
+    return rotate_img
 
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
@@ -364,7 +465,7 @@ editMenu.add_command(label="Transformacion por tramos", command=edit_by_sections
 editMenu.add_command(label="Gamma", command=edit_gamma)
 editMenu.add_command(label="Ecualización", command=edit_ecualization)
 editMenu.add_command(label="Especificar hist.", command=edit_specify_histogram)
-editMenu.add_command(label="Region de Interes", command=edit_ROI)
+editMenu.add_command(label="Simular digitalización", command=edit_ecualization)
 
 differenceMenu=Menu(editMenu, tearoff=0)
 editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
@@ -372,7 +473,7 @@ differenceMenu.add_command(label="Crear imagen diferencia", command=edit_differe
 differenceMenu.add_command(label="Mostrar diferencias", command=partial(edit_differences_between_images, 1))
 
 showMenu=Menu(menuBar, tearoff=0)
-showMenu.add_command(label="Zona de interes")
+showMenu.add_command(label="Zona de interes", command=show_ROI)
 showMenu.add_command(label="Perfil", command=show_profile_of_image)
 
 
@@ -392,7 +493,7 @@ geometricMenu.add_cascade(label="Rotacion", menu=rotateMenu)
 rotateMenu.add_command(label="90º", command=partial(geom_rotate, 1))
 rotateMenu.add_command(label="180º", command=partial(geom_rotate, 2))
 rotateMenu.add_command(label="270º", command=partial(geom_rotate, 3))
-rotateMenu.add_command(label="...", command=geom_freestyle_420_xXx_rotation)
+rotateMenu.add_command(label="...", command=geom_change_rotation)
 
 scaleMenu=Menu(geometricMenu, tearoff=0)
 geometricMenu.add_cascade(label="Escalado", menu=scaleMenu)
@@ -410,24 +511,13 @@ menuBar.add_cascade(label="Help", menu=helpMenu)
 displayed_img = ImageTk.PhotoImage(Image.open("inicio.jpg"))
 l=Label(master, image=displayed_img)
 l.pack(side="bottom", fill="both", expand="yes")
-# l.bind('<Motion>',motion)
-x_origin = 0
-y_origin = 0
-x_ending = 0
-y_ending = 0
-#create main window
-# master.title("VPC")
-# # master.iconbitmap("images/ull.ico")
-# master.geometry("300x300")
 
+current_angle = 0
 
-
-
-
-# #make a label for the window
-# label1 = tkinter.Label(master, text='Hellooooo')
-# # Lay out label
-# label1.pack()
+A = [0, 0]
+B = [0, 0]
+C = [0, 0]
+D = [0, 0]
 
 # Run forever!
 master.mainloop()
