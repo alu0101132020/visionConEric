@@ -136,7 +136,7 @@ def conversion(img, new_brightness, new_contrast):
     current_brightness = get_bright(img)
     current_contrast = get_contrast(img)
 
-    A = current_contrast / new_contrast
+    A = new_contrast / current_contrast
     B = new_brightness - current_brightness * A
 
     new_img = img.load()
@@ -170,7 +170,7 @@ def show_accumulative_histogram(img):
 
 def show_histograms(img):
     show_absolute_histogram(img)
-    show_cumulative_histogram(img)
+    show_accumulative_histogram(img)
 
 def transformation_by_sections(img, array):
         new_img = img.load()
@@ -357,10 +357,12 @@ def rotate_freestyle_img(img, rotate_degrees):
     w, h = img.size
     rotate_degrees = radians(rotate_degrees)
 
-    A = [(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), (0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
-    B = [((w-1) * cos(rotate_degrees) - 0 * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
-    C = [((w-1) * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
-    D = [(0 * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), (0 * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    global A, B, C, D
+
+    A = [round(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    B = [round(w * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(w * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    C = [round(w * cos(rotate_degrees) - h * sin(rotate_degrees)), round(w * sin(rotate_degrees) + h * cos(rotate_degrees))]
+    D = [round(0 * cos(rotate_degrees) - h * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + h * cos(rotate_degrees))]
     points = [A, B, C, D]
 
     min_x = sys.maxsize
@@ -378,11 +380,10 @@ def rotate_freestyle_img(img, rotate_degrees):
         if point[1] > max_y:
             max_y = point [1]
 
-    print(A, B, C, D, min_x, min_y, max_x, max_y)
-    new_w = ceil(abs(max_x - min_x))
-    new_h = ceil(abs(max_y - min_y))
+    print(A, B, C, D, min_x, min_y)
+    new_w = max_x - min_x
+    new_h = max_y - min_y
     print(new_w, new_h)
-    print(max_x)
 
     rotated_img = Image.new('RGB', (new_w, new_h))
 
@@ -392,18 +393,77 @@ def rotate_freestyle_img(img, rotate_degrees):
     #     if min_y < 0:
     #         point[1] -= min_y
     
-    for i in range(new_w):
-        for j in range(new_h):
-            x_value = round(i * cos(-rotate_degrees) - j * sin(-rotate_degrees))
-            y_value = round(i * sin(-rotate_degrees) + j * cos(-rotate_degrees))
-            # print(x_value, y_value)
-
-            if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
-                # print("entra", x_value, y_value, i, j, i - int(min_x), j - int(min_y))
-                rotated_img.putpixel((i + int(min_x), j + int(min_y)), (img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value))))
-            else:
-                rotated_img.putpixel((i, j), (0,0,255))
+    for i in range(w):
+        for j in range(h):
+            x_value = round(i * cos(rotate_degrees) - j * sin(rotate_degrees))
+            y_value = round(i * sin(rotate_degrees) + j * cos(rotate_degrees))
+            rotated_img.putpixel((x_value - min_x - 1, y_value), (img.getpixel((i, j)), img.getpixel((i, j)), img.getpixel((i, j))))
             
+    # for i in range(new_w):
+    #     for j in range(new_h):
+    #         x_value = round(i * cos(-rotate_degrees) - j * sin(-rotate_degrees))
+    #         y_value = round(i * sin(-rotate_degrees) + j * cos(-rotate_degrees))
+    #         # print(x_value, y_value)
+
+    #         if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
+    #             # print("entra", x_value, y_value, i, j, i - int(min_x), j - int(min_y))
+    #             rotated_img.putpixel((i + int(min_x), j + int(min_y)), (img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value)), img.getpixel((x_value, y_value))))
+    #         else:
+    #             rotated_img.putpixel((i, j), (0,0,255))
+
     return rotated_img
 
 # Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales
+
+# def rotate_freestyle_img(img, rotate_degrees):
+#     w, h = img.size
+#     rotate_degrees = radians(rotate_degrees)
+
+#     global A, B, C, D
+
+#     A = [round(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+#     B = [round(w * cos(rotate_degrees) - 0 * sin(rotate_degrees)), round(w * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+#     C = [round(w * cos(rotate_degrees) - h * sin(rotate_degrees)), round(w * sin(rotate_degrees) + h * cos(rotate_degrees))]
+#     D = [round(0 * cos(rotate_degrees) - h * sin(rotate_degrees)), round(0 * sin(rotate_degrees) + h * cos(rotate_degrees))]
+#     points = [A , B, C, D]
+
+#     min_x = sys.maxsize
+#     min_y = sys.maxsize
+#     max_x = -sys.maxsize - 1
+#     max_y = -sys.maxsize - 1
+
+#     for point in points:
+#         if point[0] < min_x:
+#             min_x = point[0]
+#         if point[1] < min_y:
+#             min_y = point [1]
+#         if point[0] > max_x:
+#             max_x = point[0]
+#         if point[1] > max_y:
+#             max_y = point [1]
+
+#     print(A, B, C, D, min_x, min_y)
+#     new_w = max_x - min_x
+#     new_h = max_y - min_y
+#     print(new_w, new_h)
+
+#     rotated_img = Image.new('RGB', (new_w, new_h))
+
+#     # for point in points:
+#     #     if min_x < 0:
+#     #         point[0] -= min_x
+#     #     if min_y < 0:
+#     #         point[1] -= min_y
+    
+#     for i in range(w):
+#         for j in range(h):
+#             x_value = round(i * cos(rotate_degrees) - j * sin(rotate_degrees))
+#             y_value = round(i * sin(rotate_degrees) + j * cos(rotate_degrees))
+#             # if (x_value > 0 and x_value < w) and (y_value > 0 and y_value < h):
+#             rotated_img.putpixel((x_value - min_x - 1, y_value), (img.getpixel((i, j)), img.getpixel((i, j)), img.getpixel((i, j))))
+#             # else:
+#             #     rotated_img.putpixel((i, j), (0,0,255))
+            
+#     return rotated_img
+
+# # Contraste, mostrar contraste y brillo, seccionar imágenes, + opcionales

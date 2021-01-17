@@ -12,6 +12,7 @@ import sklearn
 import math
 import os
 from processing_functions import *
+# import pyautogui
 
 if os.environ.get('DISPLAY','') == '':
     #print('no display found. Using :0.0')
@@ -176,6 +177,38 @@ def differences_between_images(img1, img2, option=0):
                     img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
     return img3
     
+
+def edit_ROI():
+    master.bind("<Button 1>", get_origin)
+    master.bind("<Button 1>", get_ending)
+    print_ROI
+
+def get_origin(eventorigin):
+    x_origin = eventorigin.x
+    y_origin = eventorigin.y
+
+def get_ending(eventorigin):
+    x_ending = eventorigin.x
+    y_ending = eventorigin.y
+
+def print_ROI():
+    print(x_origin, y_origin, x_ending, y_ending)
+
+def callback(event):
+    print("clicked at: ", event.x, event.y)
+
+master.bind("<Button-1>", callback)
+
+def motion(event):   
+    print("Mouse position: (%s %s)" % (event.x, event.y))   
+    return
+
+def get_brightness_img():
+    print(get_bright(img))
+
+def get_contrast_img():
+    print(get_contrast(img))
+
 # --------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -----------------------
 
 def geom_vertical_mirror():
@@ -202,7 +235,7 @@ def geom_escalate_percentage():
         panel = Tk()
         panel.title("Introduzca los valores")
         panel.geometry("250x250")
-        panel.iconbitmap('C:/Users/ericf/Desktop/ULL/VPC/visionConEric/ull.ico')
+        # panel.iconbitmap('C:/Users/ericf/Desktop/ULL/VPC/visionConEric/ull.ico')
         img = escalate_percentage(img, 80, 80, 0)
         refresh_image_visualization()
 
@@ -237,8 +270,8 @@ fileMenu.add_command(label="Cerrar", command=exit_application)
 propertyMenu=Menu(menuBar, tearoff=0)
 propertyMenu.add_command(label="Histograma abs.", command=absolute_histogram)
 propertyMenu.add_command(label="Histograma acc.", command=accumulative_histogram)
-propertyMenu.add_command(label="Brillo")
-propertyMenu.add_command(label="Contraste")
+propertyMenu.add_command(label="Brillo", command=get_brightness_img)
+propertyMenu.add_command(label="Contraste", command=get_contrast_img)
 
 editMenu=Menu(menuBar, tearoff=0)
 editMenu.add_command(label="Lineal", command=editLineal)
@@ -246,6 +279,7 @@ editMenu.add_command(label="Transformacion por tramos", command=edit_by_sections
 editMenu.add_command(label="Gamma", command=edit_gamma)
 editMenu.add_command(label="Ecualización", command=edit_ecualization)
 editMenu.add_command(label="Especificar hist.", command=edit_specify_histogram)
+editMenu.add_command(label="Region de Interes", command=edit_ROI)
 
 differenceMenu=Menu(editMenu, tearoff=0)
 editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
@@ -285,7 +319,11 @@ menuBar.add_cascade(label="Help", menu=helpMenu)
 displayed_img = ImageTk.PhotoImage(Image.open("inicio.jpg"))
 l=Label(master, image=displayed_img)
 l.pack(side="bottom", fill="both", expand="yes")
-
+# l.bind('<Motion>',motion)
+x_origin = 0
+y_origin = 0
+x_ending = 0
+y_ending = 0
 #create main window
 # master.title("VPC")
 # # master.iconbitmap("images/ull.ico")
