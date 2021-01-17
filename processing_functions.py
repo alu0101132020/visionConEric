@@ -54,6 +54,15 @@ def y_axis_setter():
     
     return y_axis
 
+def y_axis_setter_from_list(my_list):
+    y_axis = [0] * len(my_list)
+
+    for i in range(len(y_axis)):
+        y_axis[i] = i
+    
+    return y_axis
+
+
 # Function that returns a file name, extracts the extension and returns it.
 def obtain_extension(imageFileName):
     return imageFileName.split('.')[1]
@@ -172,6 +181,14 @@ def show_histograms(img):
     show_absolute_histogram(img)
     show_accumulative_histogram(img)
 
+def show_histogram_from_list(my_list):
+    y_axis = y_axis_setter_from_list(my_list)
+    plt.plot(y_axis, my_list)
+    plt.title('Amount of pixels acumulated for each value')
+    plt.xlabel('Values')
+    plt.ylabel('Amount acumulated')
+    plt.show()
+
 def transformation_by_sections(img, array):
         new_img = img.load()
         w,h = img.size
@@ -242,6 +259,32 @@ def gamma_correction(img, gamma_value):
         for j in range(h):
             new_img[i, j] = chart[img.getpixel((i,j))]
     return img
+
+def get_ROI(img, first_point, second_point):
+    min_x = sys.maxsize
+    min_y = sys.maxsize
+    max_x = -sys.maxsize - 1
+    max_y = -sys.maxsize - 1
+    for point in [first_point, second_point]:
+        if point[0] < min_x:
+            min_x = point[0]
+        if point[1] < min_y:
+            min_y = point [1]
+        if point[0] > max_x:
+            max_x = point[0]
+        if point[1] > max_y:
+            max_y = point [1]
+    w, h = img.size
+    if (min_x >= 0 and max_x < w) and (min_y >= 0 and max_y < h):
+        i = min_x
+        while i < max_x:
+            j = min_y
+            while j < max_y:
+                j+=1
+            i += 1
+    else:
+        print("Los valores no son válidos.")
+
 
 
 # --------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -----------------------

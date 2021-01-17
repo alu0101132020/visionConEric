@@ -209,6 +209,91 @@ def get_brightness_img():
 def get_contrast_img():
     print(get_contrast(img))
 
+def show_profile_of_image():    
+    global img
+    if (img != None):
+        first_point = [0, 0]
+        second_point = [0, 0]
+        first_point[0] = simpledialog.askinteger("Input", "Coordenada x del primer punto", parent=master)
+        first_point[1] = simpledialog.askinteger("Input", "Coordenada y del primer punto", parent=master)
+        second_point[0] = simpledialog.askinteger("Input", "Coordenada x del segundo punto", parent=master)
+        second_point[1] = simpledialog.askinteger("Input", "Coordenada y del segundo punto", parent=master)
+        img = profile_of_image(img, first_point, second_point)
+        refresh_image_visualization()
+
+def profile_of_image(img, first_point, second_point):
+    min_x = sys.maxsize
+    min_y = sys.maxsize
+    max_x = -sys.maxsize - 1
+    max_y = -sys.maxsize - 1
+    for point in [first_point, second_point]:
+        if point[0] < min_x:
+            min_x = point[0]
+        if point[1] < min_y:
+            min_y = point [1]
+        if point[0] > max_x:
+            max_x = point[0]
+        if point[1] > max_y:
+            max_y = point [1]
+    w, h = img.size
+    if (min_x >= 0 and max_x < w) and (min_y >= 0 and max_y < h):
+        if first_point[0] < second_point[0]:
+            A = second_point[1] - first_point[1] / second_point[0] - first_point[0]
+            B = -(first_point[0] * A) + first_point[1]
+        else:
+            A = first_point[1] - second_point[1] / first_point[0] - second_point[0]
+            B = -(first_point[0] * A) + first_point[1]
+        histogram_of_profile = []
+        histogram_of_profile_derivated = []
+        if abs(max_x - min_x) > abs(max_y - min_y):
+            i = min_x
+            while i < max_x:
+                current_pixel = int(i * A + B)
+                next_pixel = int((i + 1) * A + B)
+                histogram_of_profile.append(img.getpixel((i, current_pixel)))
+                histogram_of_profile_derivated.append(img.getpixel((i + 1, next_pixel)) - img.getpixel((i, current_pixel)))     
+                # img.putpixel((current_pixel, i), (255))    
+                i += 1
+        else:
+            i = min_y
+            while i < max_y:
+                current_pixel = int((i - B) / A)
+                next_pixel = int(((i + 1) - B) / A)
+                histogram_of_profile.append(img.getpixel((current_pixel, i)))
+                histogram_of_profile_derivated.append(img.getpixel((next_pixel, i + 1)) - img.getpixel((current_pixel, i)))
+                # img.putpixel((current_pixel, i), (255))
+                i += 1
+
+        histogram_of_profile_VMP = histogram_of_profile.copy()
+        histogram_of_profile_VMP_derivated = histogram_of_profile.copy()
+        i = 1
+        histogram_of_profile_VMP[0] = int((histogram_of_profile[1] + histogram_of_profile[0]) / 2)
+        histogram_of_profile_VMP_derivated[0] = int((histogram_of_profile_derivated[1] + histogram_of_profile_derivated[0]) / 2)
+        while i < len(histogram_of_profile) - 1:
+            j = i - 1
+            summ = 0
+            summ_derivated = 0
+            while j < i + 1:
+                summ += histogram_of_profile[j]
+                summ_derivated += histogram_of_profile_derivated[j]
+                j += 1
+            summ /= 3
+            summ_derivated /= 3
+            histogram_of_profile_VMP[i] = summ
+            histogram_of_profile_VMP_derivated[i] = summ_derivated
+            i += 1
+        histogram_of_profile_VMP[i] = int((histogram_of_profile[i] + histogram_of_profile[i - 1]) / 2)
+        histogram_of_profile_VMP_derivated[i] = int((histogram_of_profile_derivated[i] + histogram_of_profile_derivated[i - 1]) / 2)
+
+        show_histogram_from_list(histogram_of_profile)
+        show_histogram_from_list(histogram_of_profile_derivated)
+        show_histogram_from_list(histogram_of_profile_VMP)
+        show_histogram_from_list(histogram_of_profile_VMP_derivated)
+        return img
+    else:
+        print("Los valores no son válidos.")
+
+
 # --------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -------------------------------------------- SEGUNDA PARTE -----------------------
 
 def geom_vertical_mirror():
@@ -286,6 +371,11 @@ editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
 differenceMenu.add_command(label="Crear imagen diferencia", command=edit_differences_between_images)
 differenceMenu.add_command(label="Mostrar diferencias", command=partial(edit_differences_between_images, 1))
 
+showMenu=Menu(menuBar, tearoff=0)
+showMenu.add_command(label="Zona de interes")
+showMenu.add_command(label="Perfil", command=show_profile_of_image)
+
+
 helpMenu=Menu(menuBar, tearoff=0)
 helpMenu.add_command(label="License")
 helpMenu.add_command(label="About")
@@ -313,6 +403,7 @@ menuBar.add_cascade(label="File", menu=fileMenu)
 menuBar.add_cascade(label="Properties", menu=propertyMenu)
 menuBar.add_cascade(label="Edit", menu=editMenu)
 menuBar.add_cascade(label="Op. Geom.", menu=geometricMenu)
+menuBar.add_cascade(label="Show", menu=showMenu)
 menuBar.add_cascade(label="Help", menu=helpMenu)
 
 
