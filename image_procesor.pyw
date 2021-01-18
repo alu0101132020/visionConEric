@@ -52,7 +52,9 @@ def save_as_our_image():
         img_name += '.jpg'
     img.save(img_name)
 
-def refresh_image_visualization() :
+def refresh_image_visualization():
+    brightness = get_bright(img)
+    contrast = get_contrast(img)
     rotated_img = rotate_free_angle_img(img, current_angle, 0)
     displayed_img = ImageTk.PhotoImage(rotated_img)
     l.configure(image=displayed_img)
@@ -103,7 +105,6 @@ def edit_by_sections():
             messagebox.showinfo(message=error_string, title="Error introduciendo secciones")
 
         
-
 def define_sections(number_of_sections) :
     sections = [0]
     start_of_section = 0
@@ -146,11 +147,11 @@ def edit_ecualization():
         img = equalize_histogram(img)
         refresh_image_visualization()
 
-def edit_ecualization():
+def edit_digitalization():
     global img
     if (img != None):
         sampling_value = simpledialog.askinteger("Input", "Nuevo tamaño de muestreo", parent=master)
-        number_of_bits_to_cuantify = simpledialog.askinteger("Input", "Introduzca el número de bits en el que desearía cuantificar (menos de 8)", parent=master)
+        number_of_bits_to_cuantify = simpledialog.askinteger("Input", "Introduzca el número de bits en el que desearía cuantificar (8 o menos)", parent=master)
         img = digitalization(img, sampling_value, number_of_bits_to_cuantify)
         refresh_image_visualization()
 
@@ -364,7 +365,7 @@ def geom_change_rotation():
 
 def rotate_free_angle_img(img, rotate_degrees, operation = 0):
     w, h = img.size
-
+    rotate_degrees = radians(rotate_degrees)
     global A, B, C, D
 
     A = [(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), (0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
@@ -465,7 +466,7 @@ editMenu.add_command(label="Transformacion por tramos", command=edit_by_sections
 editMenu.add_command(label="Gamma", command=edit_gamma)
 editMenu.add_command(label="Ecualización", command=edit_ecualization)
 editMenu.add_command(label="Especificar hist.", command=edit_specify_histogram)
-editMenu.add_command(label="Simular digitalización", command=edit_ecualization)
+editMenu.add_command(label="Simular digitalización", command=edit_digitalization)
 
 differenceMenu=Menu(editMenu, tearoff=0)
 editMenu.add_cascade(label="Diferencia", menu=differenceMenu)
