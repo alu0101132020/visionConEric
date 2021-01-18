@@ -70,8 +70,8 @@ def absolute_histogram():
 
 def show_histogram_rotated(img):
     global current_angle
-    global option
-    rotated_img = rotate_free_angle_img(img, current_angle, option)
+    global option_rotate
+    rotated_img = rotate_free_angle_img(img, current_angle, option_rotate)
     w, h = img.size
     w2, h2 = rotated_img.size
     rotate_degrees = radians(current_angle)
@@ -105,10 +105,10 @@ def show_histogram_rotated(img):
                 histogram[rotated_img.getpixel((i,j))] += 1
 
     histogram = normalize_histogram(histogram, img)
-    summ = 0
-    for i in histogram:
-        summ += i
-    print(summ)
+    # summ = 0
+    # for i in histogram:
+    #     summ += i
+    # print(summ)
     y_axis = y_axis_setter()
     plt.plot(y_axis, histogram)
     plt.title('Amount of pixels with each value')
@@ -186,11 +186,11 @@ def fill_sections_array(index_start_of_section, sections, array) :
     A = y_difference / x_difference
     B = start_value - A * sections[index_start_of_section]
     j = sections[index_start_of_section]
-    while j < sections[index_end_of_section] : 
+    while j <= sections[index_end_of_section] : 
         value = array[j] * A + B
-        if value > 255:
+        if value >= 255:
             array[j] = 255
-        elif value < 0:
+        elif value <= 0:
             array[j] = 0
         else:
             array[j] = int(value)
@@ -261,8 +261,10 @@ def show_ROI():
         refresh_image_visualization()
 
 def motion(event):   
-    print("Mouse position: (%s %s)" % (event.x, event.y))   
-    return
+    global img
+    if (img != None):
+        print("Mouse position: (%s %s)" % (event.x, event.y) + " Nivel de gris: " + str(img.getpixel((event.x, event.y))) )   
+        return
 master.bind('<Motion>',motion)
 
 def get_information_img():
@@ -416,7 +418,7 @@ def geom_change_rotation():
         current_angle += new_angle
         refresh_image_visualization()
 
-def rotate_free_angle_img(img, rotate_degrees, operation = 0):
+def rotate_free_angle_img(img, rotate_degrees, operation):
     w, h = img.size
     rotate_degrees = radians(rotate_degrees)
 
@@ -454,7 +456,7 @@ def rotate_free_angle_img(img, rotate_degrees, operation = 0):
 def interpole_VPM_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
     w, h = img.size
     w2, h2 = rotated_img.size
-    print("Entra_VMP")
+
     for i in range(w2):
         for j in range(h2):
             x_value = round((i + min_x) * cos(-rotation_degrees) - (j + min_y) * sin(-rotation_degrees))
@@ -467,7 +469,6 @@ def interpole_VPM_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
 def interpole_bilineal_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
     w, h = img.size
     w2, h2 = rotated_img.size
-    print("Entra")
 
     for i in range(w2):
         for j in range(h2):
