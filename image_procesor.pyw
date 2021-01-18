@@ -14,7 +14,6 @@ import os
 from processing_functions import *
 
 if os.environ.get('DISPLAY','') == '':
-    #print('no display found. Using :0.0')
     os.environ.__setitem__('DISPLAY', ':0.0')
 
 master = Tk()
@@ -205,6 +204,7 @@ def show_ROI():
 def motion(event):   
     print("Mouse position: (%s %s)" % (event.x, event.y))   
     return
+master.bind('<Motion>',motion)
 
 def get_information_img():
     messagebox.showinfo("Informacion: ","Brillo: " + str(round(get_bright(img), 2)) + "\nContraste: " + str(round(get_contrast(img), 2)) + 
