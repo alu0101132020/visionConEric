@@ -46,12 +46,15 @@ def save_our_image():
 
 def save_as_our_image():
     img_name = filedialog.asksaveasfilename(confirmoverwrite=False)
-    if (img_name.split('.')[-1] != 'jpg') :
-        img_name += '.jpg'
+    if (img_name.split('.')[-1] != 'png') :
+        img_name += '.png'
     img.save(img_name)
 
 def refresh_image_visualization():
-    rotated_img = rotate_free_angle_img(img, current_angle, 0)
+    global option_rotate
+    global img
+    global current_angle
+    rotated_img = rotate_free_angle_img(img, current_angle, option_rotate)
     displayed_img = ImageTk.PhotoImage(rotated_img)
     l.configure(image=displayed_img)
     l.image = displayed_img
@@ -59,7 +62,63 @@ def refresh_image_visualization():
 
 def absolute_histogram():
     if (img != None):
-        show_absolute_histogram(img)
+        global current_angle
+        if current_angle == 0:
+            show_absolute_histogram(img)
+        else:
+            show_histogram_rotated(img)
+
+def show_histogram_rotated(img):
+    global current_angle
+    global option
+    rotated_img = rotate_free_angle_img(img, current_angle, option)
+    w, h = img.size
+    w2, h2 = rotated_img.size
+    rotate_degrees = radians(current_angle)
+    histogram = [0] * 256
+    A = [(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), (0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    B = [((w-1) * cos(rotate_degrees) - 0 * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
+    C = [((w-1) * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    D = [(0 * cos(rotate_degrees) - (h-1) * sin(rotate_degrees)), (0 * sin(rotate_degrees) + (h-1) * cos(rotate_degrees))]
+    points = [A, B, C, D]
+
+    min_x = sys.maxsize
+    min_y = sys.maxsize
+    max_x = -sys.maxsize - 1
+    max_y = -sys.maxsize - 1
+
+    for point in points:
+        if point[0] < min_x:
+            min_x = point[0]
+        if point[1] < min_y:
+            min_y = point [1]
+        if point[0] > max_x:
+            max_x = point[0]
+        if point[1] > max_y:
+            max_y = point [1]
+            
+    for i in range(w2):
+        for j in range(h2):
+            x_value = round((i + min_x) * cos(-rotate_degrees) - (j + min_y) * sin(-rotate_degrees))
+            y_value = round((i + min_x) * sin(-rotate_degrees) + (j + min_y) * cos(-rotate_degrees))
+            if (x_value > 0 and x_value < w) and (y_value > 0 and y_value < h):
+                histogram[rotated_img.getpixel((i,j))] += 1
+
+    histogram = normalize_histogram(histogram, img)
+    summ = 0
+    for i in histogram:
+        summ += i
+    print(summ)
+    y_axis = y_axis_setter()
+    plt.plot(y_axis, histogram)
+    plt.title('Amount of pixels with each value')
+    plt.xlabel('Values')
+    plt.ylabel('Amount')
+    plt.show()
+    
+
+
+    
 
 def accumulative_histogram():
     if (img != None):
@@ -350,8 +409,10 @@ def geom_rotate(times=0):
 def geom_change_rotation():
     global img
     global current_angle
+    global option_rotate
     if (img != None):
-        new_angle = simpledialog.askfloat("Input", "Introduzca el valor del brillo", parent=master)
+        new_angle = simpledialog.askfloat("Input", "Introduzca los grados a girar", parent=master)
+        ButtonRotation(parent=master)
         current_angle += new_angle
         refresh_image_visualization()
 
@@ -384,15 +445,16 @@ def rotate_free_angle_img(img, rotate_degrees, operation = 0):
     new_h = ceil(round(max_y - min_y))
     rotated_img = Image.new('L', (new_w, new_h))
     if operation == 0:
-        interpole_VPM_rotation(img, rotated_img, rotate_degrees, min_x, min_y)
-    elif operation == 1:
-        interpole_bilineal_rotation(img, rotated_img, rotate_degrees, min_x, min_y)
+        rotated_img = interpole_VPM_rotation(img, rotated_img, rotate_degrees, min_x, min_y)
+    if operation == 1:
+        rotated_img = interpole_bilineal_rotation(img, rotated_img, rotate_degrees, min_x, min_y)
 
     return rotated_img
 
 def interpole_VPM_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
     w, h = img.size
     w2, h2 = rotated_img.size
+    print("Entra_VMP")
     for i in range(w2):
         for j in range(h2):
             x_value = round((i + min_x) * cos(-rotation_degrees) - (j + min_y) * sin(-rotation_degrees))
@@ -400,11 +462,12 @@ def interpole_VPM_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
             if (x_value >= 0 and x_value < w) and (y_value >= 0 and y_value < h):
                 rotated_img.putpixel((i, j), (img.getpixel((x_value, y_value))))
 
-    return rotate_img
+    return rotated_img
 
 def interpole_bilineal_rotation(img, rotated_img, rotation_degrees, min_x, min_y):
     w, h = img.size
     w2, h2 = rotated_img.size
+    print("Entra")
 
     for i in range(w2):
         for j in range(h2):
@@ -434,7 +497,7 @@ def interpole_bilineal_rotation(img, rotated_img, rotation_degrees, min_x, min_y
                 value = round(C + (D - C) * p + (A - C) * q + (B + C - A - D) * p * q)
                 rotated_img.putpixel((i, j), value)
 
-    return rotate_img
+    return rotated_img
 
 menuBar=Menu(master)
 master.config(menu=menuBar, width=300, height=300)
@@ -506,6 +569,7 @@ l.pack(side="bottom", fill="both", expand="yes")
 current_angle = 0
 
 option = 0
+option_rotate = 0
 
 class MyClass(simpledialog.Dialog):
 
@@ -537,5 +601,36 @@ class MyClass(simpledialog.Dialog):
             return
         self.destroy()
 
+class ButtonRotation(simpledialog.Dialog):
+
+    def buttonbox(self):
+        box = Frame(self)
+        w = Button(box, text="VMP", width=10, command=self.vmp)
+        w.pack(side=LEFT, padx=5, pady=5)
+        w = Button(box, text="Bilineal", width=10, command=self.bilineal)
+        w.pack(side=LEFT, padx=5, pady=5)
+
+        box.pack()
+
+    def vmp(self):
+        global option_rotate
+        option_rotate = 0
+
+        if not self.validate():
+            self.initial_focus.focus_set() # put focus back
+            return
+        self.destroy()
+
+
+    def bilineal(self):
+        global option_rotate
+        option_rotate = 1
+        
+        if not self.validate():
+            self.initial_focus.focus_set() # put focus back
+            return
+        self.destroy()
+
 master.mainloop()
 
+# Buscar fallo rotacion bilineal

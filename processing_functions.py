@@ -158,14 +158,14 @@ def conversion(img, new_brightness, new_contrast):
     return img
 
 def show_absolute_histogram(img):
-    relative_histogram = count_pixels_values_relative(img)
-    y_axis = y_axis_setter()
-    relative_histogram_normalized = normalize_histogram(relative_histogram, img)
-    plt.plot(y_axis, relative_histogram_normalized)
-    plt.title('Amount of pixels with each value')
-    plt.xlabel('Values')
-    plt.ylabel('Amount')
-    plt.show()
+        relative_histogram = count_pixels_values_relative(img)
+        y_axis = y_axis_setter()
+        relative_histogram_normalized = normalize_histogram(relative_histogram, img)
+        plt.plot(y_axis, relative_histogram_normalized)
+        plt.title('Amount of pixels with each value')
+        plt.xlabel('Values')
+        plt.ylabel('Amount')
+        plt.show()
 
 def show_accumulative_histogram(img):
     accumulative_histogram = count_pixels_values_acumulative(img)
@@ -428,10 +428,11 @@ def interpole_VMP(img, final_img):
 def interpole_bilineal(img, final_img):
     w, h = img.size
     w2, h2 = final_img.size
-    print(w2, h2, w, h)
+    # print(w2, h2, w, h)
+
     for i in range(w2):
         for j in range(h2):
-            print(i, j)
+            # print(i, j)
             w_floor = floor(w * i/w2)
             h_floor = floor(h * j/h2)
 
