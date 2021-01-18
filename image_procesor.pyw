@@ -177,13 +177,16 @@ def differences_between_images(img1, img2, option=0):
     if option == 1:
         # show_absolute_histogram(img3)
         threshold_value = simpledialog.askinteger("Input", "Introduce el valor umbral para ver diferencias.", parent=master)
-        img3 = img3.convert(mode='RGB')
+        img4 = img3.convert(mode='RGB')
         for i in range(w):
             for j in range(h):
-                if (img3.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)):
-                    img3.putpixel((i,j), (255, 0, 0))
+                if (img4.getpixel((i,j)) > (threshold_value, threshold_value, threshold_value)):
+                    img4.putpixel((i,j), (255, 0, 0))
                 else:
-                    img3.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
+                    img4.putpixel((i,j), (img1.getpixel((i,j)), img1.getpixel((i,j)), img1.getpixel((i,j))))
+        img4.save(img_name + "_difference.jpg")
+        return img1
+
     return img3
     
 
@@ -199,29 +202,13 @@ def show_ROI():
         img = get_ROI(img, first_point, second_point)
         refresh_image_visualization()
 
-def get_origin(eventorigin):
-    x_origin = eventorigin.x
-    y_origin = eventorigin.y
-
-def get_ending(eventorigin):
-    x_ending = eventorigin.x
-    y_ending = eventorigin.y
-
-
-def callback(event):
-    print("clicked at: ", event.x, event.y)
-
-master.bind("<Button-1>", callback)
-
 def motion(event):   
     print("Mouse position: (%s %s)" % (event.x, event.y))   
     return
 
-def get_brightness_img():
-    print(get_bright(img))
-
-def get_contrast_img():
-    print(get_contrast(img))
+def get_information_img():
+    messagebox.showinfo("Informacion: ","Brillo: " + str(round(get_bright(img), 2)) + "\nContraste: " + str(round(get_contrast(img), 2)) + 
+    "\nEntropia: " + str(round(get_entropy(img), 2)))
 
 def show_profile_of_image():    
     global img
@@ -461,8 +448,7 @@ fileMenu.add_command(label="Cerrar", command=exit_application)
 propertyMenu=Menu(menuBar, tearoff=0)
 propertyMenu.add_command(label="Histograma abs.", command=absolute_histogram)
 propertyMenu.add_command(label="Histograma acc.", command=accumulative_histogram)
-propertyMenu.add_command(label="Brillo", command=get_brightness_img)
-propertyMenu.add_command(label="Contraste", command=get_contrast_img)
+propertyMenu.add_command(label="Informacion", command=get_information_img)
 
 editMenu=Menu(menuBar, tearoff=0)
 editMenu.add_command(label="Lineal", command=editLineal)
@@ -533,8 +519,8 @@ class MyClass(simpledialog.Dialog):
         box.pack()
 
     def vmp(self):
-        global opcion
-        opcion = 0
+        global option
+        option = 0
 
         if not self.validate():
             self.initial_focus.focus_set() # put focus back
@@ -543,8 +529,8 @@ class MyClass(simpledialog.Dialog):
 
 
     def bilineal(self):
-        global opcion
-        opcion = 1
+        global option
+        option = 1
         
         if not self.validate():
             self.initial_focus.focus_set() # put focus back

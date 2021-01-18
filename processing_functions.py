@@ -421,7 +421,7 @@ def interpole_VMP(img, final_img):
 
     for i in range(w2):
         for j in range(h2):
-            final_img.putpixel((i, j), img.getpixel((round(w * i/w2), round(h * j/h2))))
+            final_img.putpixel((i, j), img.getpixel((floor(w * i/w2), floor(h * j/h2))))
 
     return final_img
 
