@@ -417,6 +417,7 @@ def escalate_percentage(img, x, y, operation):
 def interpole_VMP(img, final_img):
     w, h = img.size
     w2, h2 = final_img.size
+    print(w2, h2, w, h)
 
     for i in range(w2):
         for j in range(h2):
@@ -427,9 +428,10 @@ def interpole_VMP(img, final_img):
 def interpole_bilineal(img, final_img):
     w, h = img.size
     w2, h2 = final_img.size
-
+    print(w2, h2, w, h)
     for i in range(w2):
         for j in range(h2):
+            print(i, j)
             w_floor = floor(w * i/w2)
             h_floor = floor(h * j/h2)
 

@@ -12,7 +12,6 @@ import sklearn
 import math
 import os
 from processing_functions import *
-# import pyautogui
 
 if os.environ.get('DISPLAY','') == '':
     #print('no display found. Using :0.0')
@@ -53,8 +52,6 @@ def save_as_our_image():
     img.save(img_name)
 
 def refresh_image_visualization():
-    brightness = get_bright(img)
-    contrast = get_contrast(img)
     rotated_img = rotate_free_angle_img(img, current_angle, 0)
     displayed_img = ImageTk.PhotoImage(rotated_img)
     l.configure(image=displayed_img)
@@ -338,14 +335,22 @@ def geom_traspose():
 
 def geom_escalate_percentage():
     global img
+    global option
     if (img != None):
-        img = escalate_percentage(img, 80, 80, 0)
+        x_value = simpledialog.askinteger("Input", "Introduce el porcentaje x.", parent=master)
+        y_value = simpledialog.askinteger("Input", "Introduce el porcentaje y.", parent=master)
+        MyClass(parent=master)
+        img = escalate_percentage(img, x_value, y_value, option)
         refresh_image_visualization()
 
 def geom_escalate_dimensions():
     global img
+    global option
     if (img != None):
-        img = escalate_dimensions(img, 120, 120, 0)
+        x_value = simpledialog.askinteger("Input", "Introduce la dimension de x deseada.", parent=master)
+        y_value = simpledialog.askinteger("Input", "Introduce la dimension de y deseada.", parent=master)
+        MyClass(parent=master)
+        img = escalate_dimensions(img, x_value, y_value, option)
         refresh_image_visualization()
 
 def geom_rotate(times=0):
@@ -366,7 +371,6 @@ def geom_change_rotation():
 def rotate_free_angle_img(img, rotate_degrees, operation = 0):
     w, h = img.size
     rotate_degrees = radians(rotate_degrees)
-    global A, B, C, D
 
     A = [(0 * cos(rotate_degrees) - 0 * sin(rotate_degrees)), (0 * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
     B = [((w-1) * cos(rotate_degrees) - 0 * sin(rotate_degrees)), ((w-1) * sin(rotate_degrees) + 0 * cos(rotate_degrees))]
@@ -515,10 +519,37 @@ l.pack(side="bottom", fill="both", expand="yes")
 
 current_angle = 0
 
-A = [0, 0]
-B = [0, 0]
-C = [0, 0]
-D = [0, 0]
+option = 0
 
-# Run forever!
+class MyClass(simpledialog.Dialog):
+
+    def buttonbox(self):
+        box = Frame(self)
+        w = Button(box, text="VMP", width=10, command=self.vmp)
+        w.pack(side=LEFT, padx=5, pady=5)
+        w = Button(box, text="Bilineal", width=10, command=self.bilineal)
+        w.pack(side=LEFT, padx=5, pady=5)
+
+        box.pack()
+
+    def vmp(self):
+        global opcion
+        opcion = 0
+
+        if not self.validate():
+            self.initial_focus.focus_set() # put focus back
+            return
+        self.destroy()
+
+
+    def bilineal(self):
+        global opcion
+        opcion = 1
+        
+        if not self.validate():
+            self.initial_focus.focus_set() # put focus back
+            return
+        self.destroy()
+
 master.mainloop()
+
